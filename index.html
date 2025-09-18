@@ -48,6 +48,17 @@
         #tasks-table .filter-row th { padding-bottom: 15px; padding-top: 5px; }
         .header-filter { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #d8dee9; background-color: #f8f9fa; }
         .header-filter:focus { background-color: #fff; border-color: #5e81ac; outline: none; }
+        
+        #tasks-table #project-counter {
+            text-align: right;
+            vertical-align: middle;
+            font-size: 1.1em;
+            color: #E67E22;
+            font-weight: 500;
+            padding-right: 10px;
+            white-space: nowrap;
+            text-transform: none;
+        }
 
         .edit-desc-btn { background-color: #e5e9f0; border: none; color: #4c566a; padding: 8px 12px; border-radius: 6px; cursor: pointer; width: 100%; font-size: 13px; font-weight: 500; }
         .edit-desc-btn:hover { background-color: #d8dee9; }
@@ -224,7 +235,7 @@
                             <th></th>
                             <th><select id="sponsor-filter" class="header-filter"><option value="all">Tous sponsors</option>${sponsorOptions}</select></th>
                             <th><input type="text" id="project-filter" class="header-filter" placeholder="Filtrer projet (3 car. min)..."></th>
-                            <th colspan="5"></th>
+                            <th id="project-counter" colspan="5"></th>
                         </tr>
                         <tr>
                             <th style="width: 5%;"></th>
@@ -259,10 +270,8 @@
                 tableHTML += `</tbody></table>`;
                 elements.tableWrapper.innerHTML = tableHTML;
 
-                // --- GESTION DES FILTRES ---
                 const sponsorFilterEl = document.getElementById('sponsor-filter');
                 const projectFilterEl = document.getElementById('project-filter');
-                
                 sponsorFilterEl.value = sponsorFilter;
                 projectFilterEl.value = projectFilter;
 
@@ -270,7 +279,6 @@
                     sponsorFilter = e.target.value;
                     refreshUI();
                 });
-                
                 projectFilterEl.addEventListener('input', (e) => {
                     clearTimeout(filterDebounceTimer);
                     const inputValue = e.target.value;
@@ -280,7 +288,6 @@
                     }, 1000);
                 });
 
-                // --- GESTION DES ACTIONS DU TABLEAU ---
                 elements.tableWrapper.querySelectorAll('input, select').forEach(input => input.addEventListener('change', handleInputChange));
                 elements.tableWrapper.querySelectorAll('.delete-row-btn, .edit-desc-btn').forEach(button => {
                     button.addEventListener('click', (event) => {
@@ -308,18 +315,29 @@
                 elements.descModal.classList.remove('hidden');
                 elements.descModalTextarea.focus();
             };
+            
+            const updateCounter = () => {
+                const counterEl = document.getElementById('project-counter');
+                if (!counterEl) return;
+                const count = displayedTasks.length;
+                const plural = count > 1 ? 's' : '';
+                
+                if (sponsorFilter !== 'all') {
+                    counterEl.innerHTML = `Affiche ${count} projet${plural} pour le sponsor ${sponsorFilter}`;
+                } else {
+                    counterEl.innerHTML = `Affiche ${count} projet${plural}, tous sponsors confondus`;
+                }
+            };
 
             const applyFilters = () => {
                 let filtered = [...currentTasks];
                 if (sponsorFilter !== 'all') {
                     filtered = filtered.filter(task => task.sponsor === sponsorFilter);
                 }
-                
                 const searchTerm = projectFilter.toLowerCase().trim();
                 if (searchTerm.length >= 3) {
                     filtered = filtered.filter(task => task.name.toLowerCase().includes(searchTerm));
                 }
-                
                 return filtered;
             };
 
@@ -337,16 +355,15 @@
                 currentTasks.sort((a, b) => new Date(a.end) - new Date(b.end));
                 displayedTasks = applyFilters();
                 renderTable(displayedTasks); 
-                updateChart(displayedTasks); 
+                updateChart(displayedTasks);
+                updateCounter();
             };
             
             const handleInputChange = (event) => {
                 const { id, type } = event.target.dataset;
                 const taskIndex = currentTasks.findIndex(t => t.id === id);
                 if (taskIndex === -1) return;
-
                 currentTasks[taskIndex][type] = event.target.value;
-                
                 if (type === 'start' || type === 'end') {
                     const task = currentTasks[taskIndex];
                     if (new Date(task.end) < new Date(task.start)) {
