@@ -37,17 +37,16 @@
             font-weight: 500; 
             white-space: nowrap;
         }
-        /* Style pour le bouton de suppression de ligne */
         .delete-row-btn {
             background: none;
             border: none;
-            color: #bf616a; /* Couleur rouge */
-            font-size: 1.2em; /* Taille de la croix */
+            color: #bf616a;
+            font-size: 1.2em;
             cursor: pointer;
             padding: 0 5px;
             opacity: 0.7;
             transition: opacity 0.2s, color 0.2s;
-            line-height: 1; /* Aligner verticalement */
+            line-height: 1;
         }
         .delete-row-btn:hover {
             opacity: 1;
@@ -60,15 +59,10 @@
             border-color: transparent;
             background-color: transparent;
         }
-        #tasks-table td.task-name-cell input:hover {
-            border-color: #d8dee9;
-        }
-        #tasks-table td.task-name-cell input:focus {
-            border-color: #5e81ac;
-            outline: none;
-        }
+        #tasks-table td.task-name-cell input:hover { border-color: #d8dee9; }
+        #tasks-table td.task-name-cell input:focus { border-color: #5e81ac; outline: none; }
         #tasks-table td.task-duration { text-align: center; font-weight: 500; color: #4c566a; white-space: nowrap; }
-        #tasks-table input, #tasks-table select, #tasks-table textarea { 
+        #tasks-table input, #tasks-table select { 
             width: 100%; 
             padding: 8px; 
             border: 1px solid #d8dee9; 
@@ -78,23 +72,26 @@
             box-sizing: border-box; 
         }
         #tasks-table input[type="date"], #tasks-table select { text-align: center; }
-        #tasks-table textarea { 
-            resize: none;
-        }
+        
+        .edit-desc-btn { background-color: #e5e9f0; border: none; color: #4c566a; padding: 8px 12px; border-radius: 6px; cursor: pointer; width: 100%; font-size: 13px; font-weight: 500; }
+        .edit-desc-btn:hover { background-color: #d8dee9; }
+
         #versions-select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #d8dee9; background-color: #fff; font-size: 15px; }
         .button { display: block; flex: 1; width: 100%; padding: 12px; margin-top: 10px; color: #ffffff; border: none; border-radius: 6px; font-size: 16px; font-weight: 500; cursor: pointer; transition: background-color 0.2s; text-align: center; }
         .save-button { background-color: #a3be8c; } .save-button:hover { background-color: #b5d5a2; }
         .delete-button { background-color: #d08770; } .delete-button:hover { background-color: #e59a85; }
         .cancel-button { background-color: #bf616a; } .cancel-button:hover { background-color: #d08770; }
-        .add-button { background-color: #5e81ac; }
-        .add-button:hover { background-color: #81a1c1; }
+        .add-button { background-color: #5e81ac; } .add-button:hover { background-color: #81a1c1; }
+        
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: #fff; padding: 30px; border-radius: 12px; width: 90%; max-width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .modal-content { background: #fff; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .modal-content h3 { margin-top: 0; }
         .modal-content label { display: block; margin-top: 15px; font-weight: 500; color: #4c566a; }
         .modal-content input, .modal-content select { width: 100%; padding: 10px; font-size: 1em; margin-top: 5px; border: 1px solid #d8dee9; border-radius: 6px; box-sizing: border-box; }
         .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
         .modal-actions .button { margin-top: 0; }
+        #desc-modal-textarea { width: 100%; font-size: 1em; margin-top: 5px; border: 1px solid #d8dee9; border-radius: 6px; box-sizing: border-box; resize: vertical; padding: 10px; }
+        #desc-modal-project-name { font-weight: bold; color: #2e3440; }
         .hidden { display: none; }
         .default-version-wrapper { display: flex; align-items: center; margin-top: 15px; }
         .default-version-wrapper input { width: auto; margin-right: 10px; }
@@ -124,6 +121,7 @@
             <button class="button save-button" id="manage-versions-btn">Gérer les versions...</button>
         </div>
     </div>
+
     <div id="save-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h3>Gérer les versions</h3>
@@ -145,6 +143,20 @@
         </div>
     </div>
 
+    <div id="description-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Description du projet</h3>
+            <p><strong>Projet :</strong> <span id="desc-modal-project-name"></span></p>
+            <label for="desc-modal-textarea">Description</label>
+            <textarea id="desc-modal-textarea" rows="10"></textarea>
+            <div class="modal-actions">
+                <button id="confirm-desc-btn" class="button save-button">Valider</button>
+                <button id="cancel-desc-btn" class="button cancel-button">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+
     <script>
         // --- CONFIGURATION ET DONNÉES GLOBALES ---
         const firebaseConfig = {
@@ -156,8 +168,9 @@
             appId: "1:993389286221:web:1f2adf3435c014b4851d04",
             measurementId: "G-QVK435BBE5"
         };
-        const initialTasks = []; // Planning vide au démarrage
-        
+        const initialTasks = []; 
+        const sponsors = ['AGREMENT', 'COMMERCE', 'COMPTABILITE', 'DIGITAL', 'FORMATION', 'L', 'MARKETING', 'NEOBIZ', 'NR', 'QUALITE', 'REGLEMENTAIRE', 'TECHNIQUE'];
+
         let currentTasks = [];
         let allVersions = [];
         let chart;
@@ -171,7 +184,13 @@
             return Math.round(timeDiff / (1000 * 3600 * 24)) + 1;
         };
 
-        const formatDataForChart = (tasks) => [{ name: 'Planning', data: tasks.map(t => ({ x: t.name, y: [new Date(t.start).getTime(), new Date(t.end).getTime()] })) }];
+        const formatDataForChart = (tasks) => [{
+             name: 'Planning', 
+             data: tasks.map(t => ({ 
+                 x: `[${t.sponsor}] ${t.name}`, 
+                 y: [new Date(t.start).getTime(), new Date(t.end).getTime()] 
+            })) 
+        }];
 
         document.addEventListener('DOMContentLoaded', () => {
             
@@ -180,26 +199,31 @@
                 db = firebase.firestore();
             } catch (e) {
                 console.error("Erreur d'initialisation de Firebase", e);
-                alert("Impossible d'initialiser Firebase. Vérifiez la configuration.");
                 return;
             }
 
             const elements = {
-                modal: document.getElementById('save-modal'),
+                // Modale Versions
+                saveModal: document.getElementById('save-modal'),
                 versionNameInput: document.getElementById('version-name-input'),
                 versionsSelect: document.getElementById('versions-select'),
                 modalVersionsSelect: document.getElementById('modal-versions-select'),
-                tableWrapper: document.getElementById('table-wrapper'),
-                ganttChart: document.querySelector("#gantt-chart"),
                 confirmDeleteBtn: document.getElementById('confirm-delete-btn'),
                 defaultVersionWrapper: document.getElementById('default-version-wrapper'),
-                setAsDefaultCheckbox: document.getElementById('set-as-default-checkbox')
+                setAsDefaultCheckbox: document.getElementById('set-as-default-checkbox'),
+                // Modale Description
+                descModal: document.getElementById('description-modal'),
+                descModalProjectName: document.getElementById('desc-modal-project-name'),
+                descModalTextarea: document.getElementById('desc-modal-textarea'),
+                // Page principale
+                tableWrapper: document.getElementById('table-wrapper'),
+                ganttChart: document.querySelector("#gantt-chart")
             };
             
             const chartOptions = {
                 series: [], 
                 chart: { height: 600, type: 'rangeBar', zoom: { enabled: false } },
-                plotOptions: { bar: { horizontal: true, borderRadius: 5 } },
+                plotOptions: { bar: { horizontal: true, borderRadius: 5, barHeight: '70%' } },
                 fill: { type: 'solid' },
                 colors: [function({ dataPointIndex }) {
                     const task = currentTasks[dataPointIndex];
@@ -219,9 +243,11 @@
                         if (!task) return ''; 
                         const options = { year: 'numeric', month: 'long', day: 'numeric' }; 
                         const startDate = new Date(task.start).toLocaleDateString('fr-FR', options); 
-                        const endDate = new Date(task.end).toLocaleDateString('fr-FR', options); 
+                        const endDate = new Date(task.end).toLocaleDateString('fr-FR', options);
+                        const taskDisplayName = `[${task.sponsor}] ${task.name}`;
+                        const descriptionHtml = task.description ? task.description.replace(/\n/g, '<br>') : '<i>Aucune description</i>';
                         const descriptionStyle = "font-style: italic; opacity: 0.9; margin-top: 10px; padding-top: 10px; border-top: 1px solid #4c566a; max-width: 350px; white-space: normal; overflow-wrap: break-word;";
-                        return `<div class="apexcharts-tooltip-box"><div class="apexcharts-tooltip-title">${task.name}</div><div><strong>Du:</strong> ${startDate}</div><div><strong>Au:</strong> ${endDate}</div><div style="${descriptionStyle}">${task.description}</div></div>`; 
+                        return `<div class="apexcharts-tooltip-box"><div class="apexcharts-tooltip-title">${taskDisplayName}</div><div><strong>Du:</strong> ${startDate}</div><div><strong>Au:</strong> ${endDate}</div><div style="${descriptionStyle}">${descriptionHtml}</div></div>`; 
                     } 
                 },
                 annotations: { xaxis: [{ x: new Date().getTime(), borderColor: '#e44d26', strokeDashArray: 2, label: { text: 'Aujourd\'hui', borderColor: '#e44d26', style: { color: '#fff', background: '#e44d26' } } }] }
@@ -229,51 +255,48 @@
             chart = new ApexCharts(elements.ganttChart, chartOptions);
             chart.render();
 
-            const equalizeFieldHeights = () => {
-                const table = document.getElementById('tasks-table');
-                if (!table) return;
-
-                const referenceElement = table.querySelector('select');
-                if (!referenceElement) return;
-
-                const targetHeight = referenceElement.offsetHeight;
-                const textareas = table.querySelectorAll('textarea');
-
-                textareas.forEach(textarea => {
-                    textarea.style.height = `${targetHeight}px`;
-                });
-            };
-
             const renderTable = () => {
-                let tableHTML = `<table id="tasks-table"><thead><tr><th class="center-header">Projet</th><th class="center-header">Début</th><th class="center-header">Fin</th><th class="center-header">Durée (j)</th><th class="center-header">Description</th><th class="center-header">Statut</th></tr></thead><tbody>`;
+                let tableHTML = `<table id="tasks-table"><thead><tr>
+                    <th></th>
+                    <th class="center-header">Sponsor</th>
+                    <th class="center-header">Projet</th>
+                    <th class="center-header">Début</th>
+                    <th class="center-header">Fin</th>
+                    <th class="center-header">Durée (j)</th>
+                    <th class="center-header">Description</th>
+                    <th class="center-header">Statut</th>
+                </tr></thead><tbody>`;
+
                 currentTasks.forEach((task, index) => {
                     const duration = calculateDuration(task.start, task.end);
-                    const status = task.status || 'À faire';
                     tableHTML += `<tr>
-                        <td class="task-name-cell">
-                            <button class="delete-row-btn" data-index="${index}" title="Supprimer ce projet">×</button>
-                            <input type="text" value="${task.name}" data-index="${index}" data-type="name" title="Modifier le nom du projet">
+                        <td><button class="delete-row-btn" data-index="${index}" title="Supprimer ce projet">×</button></td>
+                        <td>
+                            <select data-index="${index}" data-type="sponsor">
+                                ${sponsors.map(s => `<option value="${s}" ${task.sponsor === s ? 'selected' : ''}>${s}</option>`).join('')}
+                            </select>
                         </td>
+                        <td class="task-name-cell"><input type="text" value="${task.name}" data-index="${index}" data-type="name" title="Modifier le nom du projet"></td>
                         <td><input type="date" value="${task.start}" data-index="${index}" data-type="start"></td>
                         <td><input type="date" value="${task.end}" data-index="${index}" data-type="end"></td>
-                        <td class="task-duration" id="duration-${task.id}">${duration} j</td>
-                        <td><textarea data-index="${index}" data-type="description">${task.description || ''}</textarea></td>
+                        <td class="task-duration">${duration} j</td>
+                        <td><button class="edit-desc-btn" data-index="${index}">Détails</button></td>
                         <td>
                             <select data-index="${index}" data-type="status">
-                                <option value="À faire" ${status === 'À faire' ? 'selected' : ''}>À faire</option>
-                                <option value="En cours" ${status === 'En cours' ? 'selected' : ''}>En cours</option>
-                                <option value="Terminé" ${status === 'Terminé' ? 'selected' : ''}>Terminé</option>
+                                <option value="À faire" ${task.status === 'À faire' ? 'selected' : ''}>À faire</option>
+                                <option value="En cours" ${task.status === 'En cours' ? 'selected' : ''}>En cours</option>
+                                <option value="Terminé" ${task.status === 'Terminé' ? 'selected' : ''}>Terminé</option>
                             </select>
                         </td>
                     </tr>`;
                 });
                 tableHTML += `</tbody></table>`;
                 elements.tableWrapper.innerHTML = tableHTML;
-                elements.tableWrapper.querySelectorAll('input, textarea, select').forEach(input => input.addEventListener('change', handleInputChange));
+                elements.tableWrapper.querySelectorAll('input, select').forEach(input => input.addEventListener('change', handleInputChange));
                 
                 elements.tableWrapper.querySelectorAll('.delete-row-btn').forEach(button => {
                     button.addEventListener('click', (event) => {
-                        const indexToDelete = event.target.dataset.index;
+                        const indexToDelete = event.currentTarget.dataset.index;
                         if (confirm(`Voulez-vous vraiment supprimer le projet "${currentTasks[indexToDelete].name}" ?`)) {
                             currentTasks.splice(indexToDelete, 1);
                             refreshUI();
@@ -282,12 +305,28 @@
                     });
                 });
 
-                equalizeFieldHeights();
+                elements.tableWrapper.querySelectorAll('.edit-desc-btn').forEach(button => {
+                    button.addEventListener('click', (event) => {
+                        const index = event.currentTarget.dataset.index;
+                        openDescriptionModal(index);
+                    });
+                });
+            };
+
+            const openDescriptionModal = (index) => {
+                const task = currentTasks[index];
+                elements.descModal.dataset.editingIndex = index;
+                elements.descModalProjectName.textContent = `[${task.sponsor}] ${task.name}`;
+                elements.descModalTextarea.value = task.description || '';
+                elements.descModal.classList.remove('hidden');
+                elements.descModalTextarea.focus();
             };
 
             const updateChart = () => {
+                const chartHeight = Math.max(600, currentTasks.length * 40);
                 if (chart) {
                     chart.updateOptions({
+                        chart: { height: chartHeight },
                         series: formatDataForChart(currentTasks),
                         annotations: {
                             xaxis: [{
@@ -300,7 +339,13 @@
                     });
                 }
             };
-            const refreshUI = () => { renderTable(); updateChart(); };
+
+            const refreshUI = () => {
+                currentTasks.sort((a, b) => new Date(a.end) - new Date(b.end));
+                renderTable(); 
+                updateChart(); 
+            };
+
             const updateVersionsDropdown = (versions) => {
                 const selectedValue = elements.versionsSelect.value;
                 elements.versionsSelect.innerHTML = '<option value="">-- Sélectionnez une version --</option>';
@@ -312,6 +357,7 @@
                 });
                 if(selectedValue) elements.versionsSelect.value = selectedValue;
             };
+
             const populateModalDropdown = () => {
                 elements.modalVersionsSelect.innerHTML = '<option value="new">Créer une nouvelle version</option>';
                 allVersions.forEach(version => {
@@ -323,29 +369,34 @@
             };
 
             const setCurrentTasks = (tasks) => {
-                const tasksWithDefaults = tasks.map(task => ({ 
-                    ...task, 
-                    status: task.status || 'À faire',
-                    description: task.description || ''
-                }));
+                const tasksWithDefaults = tasks.map(task => {
+                    let sponsor = task.sponsor;
+                    let name = task.name;
+                    if (!sponsor && name) {
+                        const match = name.match(/^\[(.*?)\]\s*(.*)$/);
+                        if (match && sponsors.includes(match[1])) {
+                            sponsor = match[1];
+                            name = match[2];
+                        }
+                    }
+                    return { ...task, sponsor: sponsor || sponsors[0], name: name, status: task.status || 'À faire', description: task.description || '' };
+                });
                 currentTasks = JSON.parse(JSON.stringify(tasksWithDefaults));
                 localStorage.setItem('ganttCurrentTasks', JSON.stringify(currentTasks));
                 refreshUI();
             };
+
             const handleInputChange = (event) => {
                 const { index, type } = event.target.dataset;
                 currentTasks[index][type] = event.target.value;
-                
                 if (type === 'start' || type === 'end') {
                     const task = currentTasks[index];
                     if (new Date(task.end) < new Date(task.start)) {
                         if (type === 'start') task.end = task.start;
                         else task.start = task.end;
                     }
-                    refreshUI();
-                } else {
-                    updateChart();
                 }
+                refreshUI();
                 localStorage.setItem('ganttCurrentTasks', JSON.stringify(currentTasks));
             };
 
@@ -362,16 +413,13 @@
                 const newName = elements.versionNameInput.value.trim();
                 const isDefault = elements.setAsDefaultCheckbox.checked;
                 if (!newName) return alert("Le nom de la version ne peut pas être vide.");
-                
                 const plainTasks = JSON.parse(JSON.stringify(currentTasks));
                 const versionData = { name: newName, tasks: plainTasks, isDefault };
-                
                 const existingNameQuery = await db.collection("versions").where("name", "==", newName).get();
                 const nameExistsOnOtherDoc = !existingNameQuery.empty && existingNameQuery.docs[0].id !== selectedActionId;
                 if (nameExistsOnOtherDoc) {
                     return alert(`Une autre version nommée "${newName}" existe déjà.`);
                 }
-                
                 try {
                     const batch = db.batch();
                     if (isDefault) {
@@ -382,7 +430,6 @@
                             }
                         });
                     }
-
                     if (selectedActionId === 'new') {
                         const newDocRef = db.collection("versions").doc();
                         batch.set(newDocRef, versionData);
@@ -390,12 +437,12 @@
                         const docRef = db.collection("versions").doc(selectedActionId);
                         batch.update(docRef, versionData);
                     }
-                    
                     await batch.commit();
                     alert(`Version "${newName}" sauvegardée avec succès !`);
-                    elements.modal.classList.add('hidden');
+                    elements.saveModal.classList.add('hidden');
                 } catch (error) { console.error("Erreur de sauvegarde:", error); alert("Une erreur est survenue lors de la sauvegarde."); }
             };
+
             const deleteVersionFromFirestore = async () => {
                 const selectedId = elements.modalVersionsSelect.value;
                 if (!selectedId || selectedId === 'new') return;
@@ -406,7 +453,7 @@
                         await db.collection("versions").doc(selectedId).delete();
                         alert(`Version "${versionName}" supprimée.`);
                         setCurrentTasks(initialTasks);
-                        elements.modal.classList.add('hidden');
+                        elements.saveModal.classList.add('hidden');
                     } catch (error) { console.error("Erreur de suppression", error); }
                 }
             };
@@ -415,11 +462,9 @@
                 db.collection("versions").orderBy("name").onSnapshot(snapshot => {
                     allVersions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     updateVersionsDropdown(allVersions);
-                }, error => {
-                    console.error("ERREUR FIRESTORE:", error);
-                    alert("Impossible d'écouter les mises à jour de la base de données.");
-                });
+                }, error => { console.error("ERREUR FIRESTORE:", error); });
             };
+
             const loadInitialTasks = async () => {
                 try {
                     const snapshot = await db.collection("versions").where("isDefault", "==", true).limit(1).get();
@@ -430,11 +475,11 @@
                         return;
                     }
                 } catch (error) { console.error("Impossible de charger la version par défaut.", error); }
-                
                 const savedCurrent = localStorage.getItem('ganttCurrentTasks');
                 setCurrentTasks(savedCurrent ? JSON.parse(savedCurrent) : initialTasks);
             };
 
+            // --- LISTENERS MODALE VERSIONS ---
             document.getElementById('manage-versions-btn').addEventListener('click', () => {
                 populateModalDropdown();
                 elements.modalVersionsSelect.value = 'new';
@@ -442,7 +487,7 @@
                 elements.versionNameInput.placeholder = 'Nom de la nouvelle version...';
                 elements.confirmDeleteBtn.classList.add('hidden');
                 elements.defaultVersionWrapper.classList.add('hidden');
-                elements.modal.classList.remove('hidden');
+                elements.saveModal.classList.remove('hidden');
                 elements.versionNameInput.focus();
             });
             elements.modalVersionsSelect.addEventListener('change', (event) => {
@@ -463,19 +508,33 @@
                 }
             });
             document.getElementById('confirm-save-btn').addEventListener('click', handleSaveOrUpdateVersion);
-            document.getElementById('cancel-save-btn').addEventListener('click', () => elements.modal.classList.add('hidden'));
-            elements.versionsSelect.addEventListener('change', () => loadVersionFromFirestore(elements.versionsSelect.value));
+            document.getElementById('cancel-save-btn').addEventListener('click', () => elements.saveModal.classList.add('hidden'));
             elements.confirmDeleteBtn.addEventListener('click', deleteVersionFromFirestore);
 
+            // --- LISTENERS MODALE DESCRIPTION ---
+            document.getElementById('confirm-desc-btn').addEventListener('click', () => {
+                const index = elements.descModal.dataset.editingIndex;
+                if (index !== undefined) {
+                    currentTasks[index].description = elements.descModalTextarea.value;
+                    localStorage.setItem('ganttCurrentTasks', JSON.stringify(currentTasks));
+                    elements.descModal.classList.add('hidden');
+                    // On rafraîchit le chart pour mettre à jour l'infobulle (tooltip)
+                    updateChart();
+                }
+            });
+            document.getElementById('cancel-desc-btn').addEventListener('click', () => elements.descModal.classList.add('hidden'));
+            
+            // --- AUTRES LISTENERS ---
+            elements.versionsSelect.addEventListener('change', () => loadVersionFromFirestore(elements.versionsSelect.value));
             document.getElementById('add-task-btn').addEventListener('click', () => {
                 const today = new Date().toISOString().split('T')[0];
                 const newProject = {
                     id: `task_${new Date().getTime()}`,
-                    emoji: '', 
+                    sponsor: sponsors[0],
                     name: 'Nouveau Projet',
                     start: today,
                     end: today,
-                    description: 'Description à compléter.',
+                    description: '',
                     status: 'À faire'
                 };
                 currentTasks.push(newProject);
