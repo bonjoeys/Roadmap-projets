@@ -28,51 +28,27 @@
         #tasks-table tbody tr {
             border-bottom: 1px solid #eceff4;
         }
-        #tasks-table th { font-size: 0.9em; text-transform: uppercase; color: #4c566a; padding-bottom: 12px; }
+        #tasks-table th { font-size: 0.9em; text-transform: uppercase; color: #4c566a; padding-bottom: 12px; font-weight: 600; }
         #tasks-table th.center-header { text-align: center; }
-        #tasks-table td.task-name-cell { 
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500; 
-            white-space: nowrap;
-        }
+        #tasks-table td.delete-cell { vertical-align: middle; text-align: center; }
         .delete-row-btn {
-            background: none;
-            border: none;
-            color: #bf616a;
-            font-size: 1.2em;
-            cursor: pointer;
-            padding: 0 5px;
-            opacity: 0.7;
-            transition: opacity 0.2s, color 0.2s;
-            line-height: 1;
+            background: none; border: none; color: #bf616a; font-size: 1.6em; cursor: pointer; padding: 4px 8px; opacity: 0.7;
+            transition: opacity 0.2s, color 0.2s; line-height: 1; border-radius: 4px;
         }
-        .delete-row-btn:hover {
-            opacity: 1;
-            color: #d08770;
-        }
+        .delete-row-btn:hover { opacity: 1; color: #d08770; background-color: #eceff4; }
 
-        #tasks-table td.task-name-cell input {
-            text-align: left;
-            flex-grow: 1;
-            border-color: transparent;
-            background-color: transparent;
-        }
+        #tasks-table td.task-name-cell { vertical-align: middle; }
+        #tasks-table td.task-name-cell input { text-align: left; flex-grow: 1; border-color: transparent; background-color: transparent; }
         #tasks-table td.task-name-cell input:hover { border-color: #d8dee9; }
         #tasks-table td.task-name-cell input:focus { border-color: #5e81ac; outline: none; }
-        #tasks-table td.task-duration { text-align: center; font-weight: 500; color: #4c566a; white-space: nowrap; }
-        #tasks-table input, #tasks-table select { 
-            width: 100%; 
-            padding: 8px; 
-            border: 1px solid #d8dee9; 
-            border-radius: 6px; 
-            font-family: inherit; 
-            font-size: 14px; 
-            box-sizing: border-box; 
-        }
+        #tasks-table td.task-duration { text-align: center; font-weight: 500; color: #4c566a; white-space: nowrap; vertical-align: middle; }
+        #tasks-table input, #tasks-table select { width: 100%; padding: 8px; border: 1px solid #d8dee9; border-radius: 6px; font-family: inherit; font-size: 14px; box-sizing: border-box; }
         #tasks-table input[type="date"], #tasks-table select { text-align: center; }
         
+        #tasks-table .filter-row th { padding-bottom: 15px; padding-top: 5px; }
+        .header-filter { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #d8dee9; background-color: #f8f9fa; }
+        .header-filter:focus { background-color: #fff; border-color: #5e81ac; outline: none; }
+
         .edit-desc-btn { background-color: #e5e9f0; border: none; color: #4c566a; padding: 8px 12px; border-radius: 6px; cursor: pointer; width: 100%; font-size: 13px; font-weight: 500; }
         .edit-desc-btn:hover { background-color: #d8dee9; }
 
@@ -126,9 +102,7 @@
         <div class="modal-content">
             <h3>Gérer les versions</h3>
             <label for="modal-versions-select">Action</label>
-            <select id="modal-versions-select">
-                <option value="new">Créer une nouvelle version</option>
-            </select>
+            <select id="modal-versions-select"><option value="new">Créer une nouvelle version</option></select>
             <label for="version-name-input">Nom de la version</label>
             <input type="text" id="version-name-input" placeholder="Nom de la nouvelle version...">
             <div id="default-version-wrapper" class="default-version-wrapper hidden">
@@ -156,9 +130,7 @@
         </div>
     </div>
 
-
     <script>
-        // --- CONFIGURATION ET DONNÉES GLOBALES ---
         const firebaseConfig = {
             apiKey: "AIzaSyB8OWLAAZr9kVdZKZgYTndAd8fPUCzLxMc",
             authDomain: "gantt-agenda-sgs.firebaseapp.com",
@@ -172,7 +144,11 @@
         const sponsors = ['AGREMENT', 'COMMERCE', 'COMPTABILITE', 'DIGITAL', 'FORMATION', 'L', 'MARKETING', 'NEOBIZ', 'NR', 'QUALITE', 'REGLEMENTAIRE', 'TECHNIQUE'];
 
         let currentTasks = [];
+        let displayedTasks = [];
+        let sponsorFilter = 'all';
+        let projectFilter = '';
         let allVersions = [];
+        let filterDebounceTimer;
         let chart;
         let db;
 
@@ -180,8 +156,7 @@
             const startDate = new Date(start);
             const endDate = new Date(end);
             if (isNaN(startDate) || isNaN(endDate) || endDate < startDate) return 0;
-            const timeDiff = endDate.getTime() - startDate.getTime();
-            return Math.round(timeDiff / (1000 * 3600 * 24)) + 1;
+            return Math.round((endDate - startDate) / (1000 * 3600 * 24)) + 1;
         };
 
         const formatDataForChart = (tasks) => [{
@@ -194,42 +169,28 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             
-            try {
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.firestore();
-            } catch (e) {
-                console.error("Erreur d'initialisation de Firebase", e);
-                return;
-            }
+            try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } 
+            catch (e) { console.error("Erreur d'initialisation de Firebase", e); }
 
             const elements = {
-                // Modale Versions
-                saveModal: document.getElementById('save-modal'),
-                versionNameInput: document.getElementById('version-name-input'),
-                versionsSelect: document.getElementById('versions-select'),
-                modalVersionsSelect: document.getElementById('modal-versions-select'),
-                confirmDeleteBtn: document.getElementById('confirm-delete-btn'),
-                defaultVersionWrapper: document.getElementById('default-version-wrapper'),
+                saveModal: document.getElementById('save-modal'), versionNameInput: document.getElementById('version-name-input'),
+                versionsSelect: document.getElementById('versions-select'), modalVersionsSelect: document.getElementById('modal-versions-select'),
+                confirmDeleteBtn: document.getElementById('confirm-delete-btn'), defaultVersionWrapper: document.getElementById('default-version-wrapper'),
                 setAsDefaultCheckbox: document.getElementById('set-as-default-checkbox'),
-                // Modale Description
-                descModal: document.getElementById('description-modal'),
-                descModalProjectName: document.getElementById('desc-modal-project-name'),
+                descModal: document.getElementById('description-modal'), descModalProjectName: document.getElementById('desc-modal-project-name'),
                 descModalTextarea: document.getElementById('desc-modal-textarea'),
-                // Page principale
                 tableWrapper: document.getElementById('table-wrapper'),
                 ganttChart: document.querySelector("#gantt-chart")
             };
             
             const chartOptions = {
-                series: [], 
-                chart: { height: 600, type: 'rangeBar', zoom: { enabled: false } },
+                series: [], chart: { height: 600, type: 'rangeBar', zoom: { enabled: false } },
                 plotOptions: { bar: { horizontal: true, borderRadius: 5, barHeight: '70%' } },
                 fill: { type: 'solid' },
-                colors: [function({ dataPointIndex }) {
-                    const task = currentTasks[dataPointIndex];
+                colors: [({ dataPointIndex }) => {
+                    const task = displayedTasks[dataPointIndex];
                     if (!task) return '#E67E22';
-                    const isOverdue = new Date(task.end) < new Date() && task.status !== 'Terminé';
-                    if (isOverdue) return '#BF616A';
+                    if (new Date(task.end) < new Date() && task.status !== 'Terminé') return '#BF616A';
                     if (task.status === 'Terminé') return '#A3BE8C';
                     return '#E67E22';
                 }],
@@ -238,8 +199,8 @@
                 grid: { borderColor: '#e5e9f0', row: { colors: ['#f9fafb', '#ffffff'], opacity: 1 } },
                 tooltip: { 
                     theme: 'dark', 
-                    custom: function({seriesIndex, dataPointIndex}) { 
-                        const task = currentTasks[dataPointIndex]; 
+                    custom: ({ seriesIndex, dataPointIndex }) => { 
+                        const task = displayedTasks[dataPointIndex]; 
                         if (!task) return ''; 
                         const options = { year: 'numeric', month: 'long', day: 'numeric' }; 
                         const startDate = new Date(task.start).toLocaleDateString('fr-FR', options); 
@@ -254,96 +215,147 @@
             };
             chart = new ApexCharts(elements.ganttChart, chartOptions);
             chart.render();
+            
+            const renderTable = (tasks) => {
+                const sponsorOptions = sponsors.map(s => `<option value="${s}">${s}</option>`).join('');
+                let tableHTML = `<table id="tasks-table">
+                    <thead>
+                        <tr class="filter-row">
+                            <th></th>
+                            <th><select id="sponsor-filter" class="header-filter"><option value="all">Tous sponsors</option>${sponsorOptions}</select></th>
+                            <th><input type="text" id="project-filter" class="header-filter" placeholder="Filtrer projet (3 car. min)..."></th>
+                            <th colspan="5"></th>
+                        </tr>
+                        <tr>
+                            <th style="width: 5%;"></th>
+                            <th class="center-header" style="width: 15%;">Sponsor</th>
+                            <th class="center-header">Projet</th>
+                            <th class="center-header" style="width: 12%;">Début</th>
+                            <th class="center-header" style="width: 12%;">Fin</th>
+                            <th class="center-header" style="width: 8%;">Durée (j)</th>
+                            <th class="center-header" style="width: 10%;">Description</th>
+                            <th class="center-header" style="width: 12%;">Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
 
-            const renderTable = () => {
-                let tableHTML = `<table id="tasks-table"><thead><tr>
-                    <th></th>
-                    <th class="center-header">Sponsor</th>
-                    <th class="center-header">Projet</th>
-                    <th class="center-header">Début</th>
-                    <th class="center-header">Fin</th>
-                    <th class="center-header">Durée (j)</th>
-                    <th class="center-header">Description</th>
-                    <th class="center-header">Statut</th>
-                </tr></thead><tbody>`;
-
-                currentTasks.forEach((task, index) => {
+                tasks.forEach((task) => {
                     const duration = calculateDuration(task.start, task.end);
                     tableHTML += `<tr>
-                        <td><button class="delete-row-btn" data-index="${index}" title="Supprimer ce projet">×</button></td>
-                        <td>
-                            <select data-index="${index}" data-type="sponsor">
-                                ${sponsors.map(s => `<option value="${s}" ${task.sponsor === s ? 'selected' : ''}>${s}</option>`).join('')}
-                            </select>
-                        </td>
-                        <td class="task-name-cell"><input type="text" value="${task.name}" data-index="${index}" data-type="name" title="Modifier le nom du projet"></td>
-                        <td><input type="date" value="${task.start}" data-index="${index}" data-type="start"></td>
-                        <td><input type="date" value="${task.end}" data-index="${index}" data-type="end"></td>
+                        <td class="delete-cell"><button class="delete-row-btn" data-id="${task.id}" title="Supprimer ce projet">×</button></td>
+                        <td><select data-id="${task.id}" data-type="sponsor">${sponsors.map(s => `<option value="${s}" ${task.sponsor === s ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
+                        <td class="task-name-cell"><input type="text" value="${task.name}" data-id="${task.id}" data-type="name"></td>
+                        <td><input type="date" value="${task.start}" data-id="${task.id}" data-type="start"></td>
+                        <td><input type="date" value="${task.end}" data-id="${task.id}" data-type="end"></td>
                         <td class="task-duration">${duration} j</td>
-                        <td><button class="edit-desc-btn" data-index="${index}">Détails</button></td>
-                        <td>
-                            <select data-index="${index}" data-type="status">
-                                <option value="À faire" ${task.status === 'À faire' ? 'selected' : ''}>À faire</option>
-                                <option value="En cours" ${task.status === 'En cours' ? 'selected' : ''}>En cours</option>
-                                <option value="Terminé" ${task.status === 'Terminé' ? 'selected' : ''}>Terminé</option>
-                            </select>
-                        </td>
+                        <td><button class="edit-desc-btn" data-id="${task.id}">Détails</button></td>
+                        <td><select data-id="${task.id}" data-type="status">
+                            <option value="À faire" ${task.status === 'À faire' ? 'selected' : ''}>À faire</option>
+                            <option value="En cours" ${task.status === 'En cours' ? 'selected' : ''}>En cours</option>
+                            <option value="Terminé" ${task.status === 'Terminé' ? 'selected' : ''}>Terminé</option>
+                        </select></td>
                     </tr>`;
                 });
                 tableHTML += `</tbody></table>`;
                 elements.tableWrapper.innerHTML = tableHTML;
-                elements.tableWrapper.querySelectorAll('input, select').forEach(input => input.addEventListener('change', handleInputChange));
+
+                // --- GESTION DES FILTRES ---
+                const sponsorFilterEl = document.getElementById('sponsor-filter');
+                const projectFilterEl = document.getElementById('project-filter');
                 
-                elements.tableWrapper.querySelectorAll('.delete-row-btn').forEach(button => {
-                    button.addEventListener('click', (event) => {
-                        const indexToDelete = event.currentTarget.dataset.index;
-                        if (confirm(`Voulez-vous vraiment supprimer le projet "${currentTasks[indexToDelete].name}" ?`)) {
-                            currentTasks.splice(indexToDelete, 1);
-                            refreshUI();
-                            localStorage.setItem('ganttCurrentTasks', JSON.stringify(currentTasks));
-                        }
-                    });
+                sponsorFilterEl.value = sponsorFilter;
+                projectFilterEl.value = projectFilter;
+
+                sponsorFilterEl.addEventListener('change', (e) => {
+                    sponsorFilter = e.target.value;
+                    refreshUI();
+                });
+                
+                projectFilterEl.addEventListener('input', (e) => {
+                    clearTimeout(filterDebounceTimer);
+                    const inputValue = e.target.value;
+                    filterDebounceTimer = setTimeout(() => {
+                        projectFilter = inputValue;
+                        refreshUI();
+                    }, 1000);
                 });
 
-                elements.tableWrapper.querySelectorAll('.edit-desc-btn').forEach(button => {
+                // --- GESTION DES ACTIONS DU TABLEAU ---
+                elements.tableWrapper.querySelectorAll('input, select').forEach(input => input.addEventListener('change', handleInputChange));
+                elements.tableWrapper.querySelectorAll('.delete-row-btn, .edit-desc-btn').forEach(button => {
                     button.addEventListener('click', (event) => {
-                        const index = event.currentTarget.dataset.index;
-                        openDescriptionModal(index);
+                        const id = event.currentTarget.dataset.id;
+                        if (button.classList.contains('delete-row-btn')) {
+                            const taskIndex = currentTasks.findIndex(t => t.id === id);
+                            if (taskIndex > -1 && confirm(`Supprimer le projet "${currentTasks[taskIndex].name}" ?`)) {
+                                currentTasks.splice(taskIndex, 1);
+                                refreshUI();
+                                localStorage.setItem('ganttCurrentTasks', JSON.stringify(currentTasks));
+                            }
+                        } else if (button.classList.contains('edit-desc-btn')) {
+                            openDescriptionModal(id);
+                        }
                     });
                 });
             };
 
-            const openDescriptionModal = (index) => {
-                const task = currentTasks[index];
-                elements.descModal.dataset.editingIndex = index;
+            const openDescriptionModal = (taskId) => {
+                const task = currentTasks.find(t => t.id === taskId);
+                if (!task) return;
+                elements.descModal.dataset.editingId = taskId;
                 elements.descModalProjectName.textContent = `[${task.sponsor}] ${task.name}`;
                 elements.descModalTextarea.value = task.description || '';
                 elements.descModal.classList.remove('hidden');
                 elements.descModalTextarea.focus();
             };
 
-            const updateChart = () => {
-                const chartHeight = Math.max(600, currentTasks.length * 40);
+            const applyFilters = () => {
+                let filtered = [...currentTasks];
+                if (sponsorFilter !== 'all') {
+                    filtered = filtered.filter(task => task.sponsor === sponsorFilter);
+                }
+                
+                const searchTerm = projectFilter.toLowerCase().trim();
+                if (searchTerm.length >= 3) {
+                    filtered = filtered.filter(task => task.name.toLowerCase().includes(searchTerm));
+                }
+                
+                return filtered;
+            };
+
+            const updateChart = (tasks) => {
+                const chartHeight = Math.max(400, tasks.length * 45);
                 if (chart) {
                     chart.updateOptions({
-                        chart: { height: chartHeight },
-                        series: formatDataForChart(currentTasks),
-                        annotations: {
-                            xaxis: [{
-                                x: new Date().getTime(),
-                                borderColor: '#e44d26',
-                                strokeDashArray: 2,
-                                label: { text: 'Aujourd\'hui', borderColor: '#e44d26', style: { color: '#fff', background: '#e44d26' } }
-                            }]
-                        }
+                        chart: { height: chartHeight }, series: formatDataForChart(tasks),
+                        annotations: { xaxis: [{ x: new Date().getTime(), borderColor: '#e44d26', strokeDashArray: 2, label: { text: 'Aujourd\'hui', borderColor: '#e44d26', style: { color: '#fff', background: '#e44d26' } } }] }
                     });
                 }
             };
 
             const refreshUI = () => {
                 currentTasks.sort((a, b) => new Date(a.end) - new Date(b.end));
-                renderTable(); 
-                updateChart(); 
+                displayedTasks = applyFilters();
+                renderTable(displayedTasks); 
+                updateChart(displayedTasks); 
+            };
+            
+            const handleInputChange = (event) => {
+                const { id, type } = event.target.dataset;
+                const taskIndex = currentTasks.findIndex(t => t.id === id);
+                if (taskIndex === -1) return;
+
+                currentTasks[taskIndex][type] = event.target.value;
+                
+                if (type === 'start' || type === 'end') {
+                    const task = currentTasks[taskIndex];
+                    if (new Date(task.end) < new Date(task.start)) {
+                        if (type === 'start') task.end = task.start;
+                        else task.start = task.end;
+                    }
+                }
+                refreshUI();
+                localStorage.setItem('ganttCurrentTasks', JSON.stringify(currentTasks));
             };
 
             const updateVersionsDropdown = (versions) => {
@@ -370,44 +382,20 @@
 
             const setCurrentTasks = (tasks) => {
                 const tasksWithDefaults = tasks.map(task => {
-                    let sponsor = task.sponsor;
-                    let name = task.name;
+                    let sponsor = task.sponsor, name = task.name;
                     if (!sponsor && name) {
                         const match = name.match(/^\[(.*?)\]\s*(.*)$/);
-                        if (match && sponsors.includes(match[1])) {
-                            sponsor = match[1];
-                            name = match[2];
-                        }
+                        if (match && sponsors.includes(match[1])) { [sponsor, name] = [match[1], match[2]]; }
                     }
-                    return { ...task, sponsor: sponsor || sponsors[0], name: name, status: task.status || 'À faire', description: task.description || '' };
+                    return { id: task.id || `task_${new Date().getTime()}_${Math.random()}`, ...task, sponsor: sponsor || sponsors[0], name, status: task.status || 'À faire', description: task.description || '' };
                 });
                 currentTasks = JSON.parse(JSON.stringify(tasksWithDefaults));
                 localStorage.setItem('ganttCurrentTasks', JSON.stringify(currentTasks));
                 refreshUI();
             };
-
-            const handleInputChange = (event) => {
-                const { index, type } = event.target.dataset;
-                currentTasks[index][type] = event.target.value;
-                if (type === 'start' || type === 'end') {
-                    const task = currentTasks[index];
-                    if (new Date(task.end) < new Date(task.start)) {
-                        if (type === 'start') task.end = task.start;
-                        else task.start = task.end;
-                    }
-                }
-                refreshUI();
-                localStorage.setItem('ganttCurrentTasks', JSON.stringify(currentTasks));
-            };
-
-            const loadVersionFromFirestore = async (versionId) => {
-                if (!versionId) return;
-                try {
-                    const doc = await db.collection("versions").doc(versionId).get();
-                    if (doc.exists) setCurrentTasks(doc.data().tasks);
-                } catch (error) { console.error("Erreur de lecture", error); }
-            };
-
+            
+            const loadVersionFromFirestore = async (versionId) => { if (!versionId) return; try { const doc = await db.collection("versions").doc(versionId).get(); if (doc.exists) setCurrentTasks(doc.data().tasks); } catch (error) { console.error("Erreur de lecture", error); } };
+            
             const handleSaveOrUpdateVersion = async () => {
                 const selectedActionId = elements.modalVersionsSelect.value;
                 const newName = elements.versionNameInput.value.trim();
@@ -417,17 +405,13 @@
                 const versionData = { name: newName, tasks: plainTasks, isDefault };
                 const existingNameQuery = await db.collection("versions").where("name", "==", newName).get();
                 const nameExistsOnOtherDoc = !existingNameQuery.empty && existingNameQuery.docs[0].id !== selectedActionId;
-                if (nameExistsOnOtherDoc) {
-                    return alert(`Une autre version nommée "${newName}" existe déjà.`);
-                }
+                if (nameExistsOnOtherDoc) return alert(`Une autre version nommée "${newName}" existe déjà.`);
                 try {
                     const batch = db.batch();
                     if (isDefault) {
                         const currentDefaultQuery = await db.collection("versions").where("isDefault", "==", true).get();
                         currentDefaultQuery.forEach(doc => {
-                            if (doc.id !== selectedActionId) {
-                                batch.update(doc.ref, { isDefault: false });
-                            }
+                            if (doc.id !== selectedActionId) batch.update(doc.ref, { isDefault: false });
                         });
                     }
                     if (selectedActionId === 'new') {
@@ -440,7 +424,7 @@
                     await batch.commit();
                     alert(`Version "${newName}" sauvegardée avec succès !`);
                     elements.saveModal.classList.add('hidden');
-                } catch (error) { console.error("Erreur de sauvegarde:", error); alert("Une erreur est survenue lors de la sauvegarde."); }
+                } catch (error) { console.error("Erreur:", error); alert("Erreur lors de la sauvegarde."); }
             };
 
             const deleteVersionFromFirestore = async () => {
@@ -458,28 +442,39 @@
                 }
             };
             
-            const listenForVersionsChanges = () => {
-                db.collection("versions").orderBy("name").onSnapshot(snapshot => {
+            const listenForVersionsChanges = () => { 
+                db.collection("versions").orderBy("name").onSnapshot(snapshot => { 
                     allVersions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     updateVersionsDropdown(allVersions);
-                }, error => { console.error("ERREUR FIRESTORE:", error); });
+                }, error => console.error("ERREUR FIRESTORE:", error)); 
+            };
+            
+            const loadInitialTasks = async () => { 
+                try { 
+                    const snapshot = await db.collection("versions").where("isDefault", "==", true).limit(1).get(); 
+                    if (!snapshot.empty) { 
+                        const doc = snapshot.docs[0]; 
+                        setCurrentTasks(doc.data().tasks); 
+                        elements.versionsSelect.value = doc.id; 
+                        return; 
+                    } 
+                } catch (e) { console.error(e); } 
+                const saved = localStorage.getItem('ganttCurrentTasks'); 
+                setCurrentTasks(saved ? JSON.parse(saved) : initialTasks); 
             };
 
-            const loadInitialTasks = async () => {
-                try {
-                    const snapshot = await db.collection("versions").where("isDefault", "==", true).limit(1).get();
-                    if (!snapshot.empty) {
-                        const defaultDoc = snapshot.docs[0];
-                        setCurrentTasks(defaultDoc.data().tasks);
-                        elements.versionsSelect.value = defaultDoc.id;
-                        return;
-                    }
-                } catch (error) { console.error("Impossible de charger la version par défaut.", error); }
-                const savedCurrent = localStorage.getItem('ganttCurrentTasks');
-                setCurrentTasks(savedCurrent ? JSON.parse(savedCurrent) : initialTasks);
-            };
-
-            // --- LISTENERS MODALE VERSIONS ---
+            document.getElementById('confirm-desc-btn').addEventListener('click', () => {
+                const id = elements.descModal.dataset.editingId;
+                const taskIndex = currentTasks.findIndex(t => t.id === id);
+                if (taskIndex > -1) {
+                    currentTasks[taskIndex].description = elements.descModalTextarea.value;
+                    localStorage.setItem('ganttCurrentTasks', JSON.stringify(currentTasks));
+                    elements.descModal.classList.add('hidden');
+                    updateChart(displayedTasks);
+                }
+            });
+            document.getElementById('cancel-desc-btn').addEventListener('click', () => elements.descModal.classList.add('hidden'));
+            
             document.getElementById('manage-versions-btn').addEventListener('click', () => {
                 populateModalDropdown();
                 elements.modalVersionsSelect.value = 'new';
@@ -490,6 +485,7 @@
                 elements.saveModal.classList.remove('hidden');
                 elements.versionNameInput.focus();
             });
+
             elements.modalVersionsSelect.addEventListener('change', (event) => {
                 const selectedId = event.target.value;
                 if (selectedId === 'new') {
@@ -507,35 +503,18 @@
                     elements.defaultVersionWrapper.classList.remove('hidden');
                 }
             });
+            
             document.getElementById('confirm-save-btn').addEventListener('click', handleSaveOrUpdateVersion);
             document.getElementById('cancel-save-btn').addEventListener('click', () => elements.saveModal.classList.add('hidden'));
             elements.confirmDeleteBtn.addEventListener('click', deleteVersionFromFirestore);
 
-            // --- LISTENERS MODALE DESCRIPTION ---
-            document.getElementById('confirm-desc-btn').addEventListener('click', () => {
-                const index = elements.descModal.dataset.editingIndex;
-                if (index !== undefined) {
-                    currentTasks[index].description = elements.descModalTextarea.value;
-                    localStorage.setItem('ganttCurrentTasks', JSON.stringify(currentTasks));
-                    elements.descModal.classList.add('hidden');
-                    // On rafraîchit le chart pour mettre à jour l'infobulle (tooltip)
-                    updateChart();
-                }
-            });
-            document.getElementById('cancel-desc-btn').addEventListener('click', () => elements.descModal.classList.add('hidden'));
-            
-            // --- AUTRES LISTENERS ---
             elements.versionsSelect.addEventListener('change', () => loadVersionFromFirestore(elements.versionsSelect.value));
+            
             document.getElementById('add-task-btn').addEventListener('click', () => {
                 const today = new Date().toISOString().split('T')[0];
                 const newProject = {
-                    id: `task_${new Date().getTime()}`,
-                    sponsor: sponsors[0],
-                    name: 'Nouveau Projet',
-                    start: today,
-                    end: today,
-                    description: '',
-                    status: 'À faire'
+                    id: `task_${new Date().getTime()}`, sponsor: sponsorFilter !== 'all' ? sponsorFilter : sponsors[0], name: 'Nouveau Projet',
+                    start: today, end: today, description: '', status: 'À faire'
                 };
                 currentTasks.push(newProject);
                 refreshUI();
