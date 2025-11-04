@@ -759,6 +759,7 @@
                     <button class="button add-button" id="create-version-btn">Créer une nouvelle version</button>
                     <button class="button delete-button" id="delete-version-btn">Supprimer la version</button>
                     <button class="button" id="export-pdf-btn" style="background-color: var(--nord8);">Exporter en PDF</button>
+                    <button class="button" id="export-xls-btn" style="background-color: var(--nord14);">Exporter en XLS</button>
                 </div>
             </div>
         </div>
@@ -1585,6 +1586,74 @@
             document.getElementById('export-pdf-btn').addEventListener('click', () => {
                 window.print();
             });
+
+
+            // AJOUTÉ : Fonction d'export XLS (CSV)
+            const exportToXLS = () => {
+                const tasksToExport = displayedTasks; // Utilise les tâches actuellement affichées/filtrées
+                if (tasksToExport.length === 0) {
+                    alert("Aucun projet à exporter.");
+                    return;
+                }
+
+                // Définir les en-têtes du CSV (avec point-virgule comme séparateur pour Excel FR)
+                const headers = ["ID", "Nom du Projet", "Sponsor", "Statut", "Date de début", "Date de fin", "Description"];
+                let csvContent = headers.join(";") + "\n";
+
+                tasksToExport.forEach(task => {
+                    // Fonction pour nettoyer les données pour le CSV
+                    const clean = (str) => {
+                        if (str === null || str === undefined) return '""';
+                        let result = String(str).replace(/\n/g, " - "); // Remplacer les sauts de ligne
+                        result = result.replace(/"/g, '""'); // Échapper les guillemets
+                        return `"${result}"`; // Toujours mettre entre guillemets
+                    };
+
+                    const row = [
+                        task.id,
+                        clean(task.name),
+                        task.sponsor,
+                        task.status,
+                        task.start,
+                        task.end,
+                        clean(task.description)
+                    ];
+                    csvContent += row.join(";") + "\n";
+                });
+
+                // Gérer l'encodage pour Excel (BOM UTF-8) pour une lecture correcte des accents
+                const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+                
+                // Créer le lien de téléchargement (via URL.createObjectURL pour les blobs)
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+
+                // Nommer le fichier dynamiquement
+                const versionSelect = document.getElementById('versions-select');
+                let versionName = "export";
+                if (versionSelect.value && versionSelect.selectedIndex > 0) {
+                    // Nettoyer le nom de la version pour le nom de fichier
+                    versionName = versionSelect.options[versionSelect.selectedIndex].text
+                                    .replace(/ \(par défaut\)/g, "")
+                                    .trim()
+                                    .replace(/[^a-z0-9_\-]/gi, '_'); // Remplace les caractères non-alphanumériques
+                }
+                const today = new Date().toISOString().split('T')[0];
+                link.setAttribute("download", `roadmap_${versionName}_${today}.csv`);
+                
+                document.body.appendChild(link);
+                link.click();
+                
+                // Nettoyage après le clic
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            };
+
+            // AJOUTÉ : Écouteur pour le bouton XLS
+            document.getElementById('export-xls-btn').addEventListener('click', exportToXLS);
 
 
             listenForVersionsChanges();
