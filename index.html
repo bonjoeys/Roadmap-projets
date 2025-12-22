@@ -198,7 +198,7 @@
             padding: 30px; 
             border-radius: 12px; 
             width: 95%; 
-            max-width: 1100px; /* Élargissement significatif */
+            max-width: 900px; /* Élargissement significatif */
             box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
             max-height: 95vh; 
             overflow-y: auto; 
@@ -673,7 +673,7 @@
             gap: 15px;
         }
         /* Sur mobile, on repasse en 2x2 */
-        @media (max-width: 700px) {
+        @media (max-width: 900px) {
             .project-metrics-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
@@ -861,6 +861,72 @@
             border: 1px dashed var(--nord11);
         }
         </style>
+
+<style>
+    /* --- CORRECTIF LAYOUT COMPACT --- */
+    
+    /* 1. Élargissement pour le mode Paysage complet */
+    .modal-content { 
+        max-width: 1000px !important; 
+        padding: 20px 30px !important; /* Un peu moins de padding vertical */
+    }
+
+    /* 2. Réduction des espaces pour éviter l'ascenseur */
+    #project-form {
+        row-gap: 8px !important; /* Rapproche les lignes */
+    }
+    .modal-content label {
+        margin-top: 8px !important; /* Rapproche les titres des champs précédents */
+        font-size: 0.85em !important; /* Titres un peu plus discrets */
+    }
+    .modal-content input, .modal-content select, .modal-content textarea {
+        padding: 8px !important; /* Inputs un peu moins hauts */
+        margin-top: 2px !important;
+    }
+
+    /* 3. HOMOGÉNÉISATION JIRA (SlimSelect) */
+    .ss-main {
+        background-color: #fff !important;
+        border: 1px solid var(--nord4) !important;
+        border-radius: 6px !important;
+        padding: 2px !important; /* Ajustement fin */
+        min-height: 38px !important; /* Force la même hauteur que les inputs standards */
+        display: flex !important;
+        align-items: center !important;
+    }
+    .ss-content {
+        border: 1px solid var(--nord4) !important; /* Bordure menu déroulant cohérente */
+    }
+    /* Enlève le bleu du label Jira s'il reste des traces inline */
+    label[for="project-jira-epic"] {
+        color: #4c566a !important; /* Couleur standard */
+        font-weight: 500 !important; /* Graisse standard */
+    }
+</style>
+
+
+<style>
+    /* CORRECTIF ULTIME : Espace pour le symbole € */
+    .input-wrapper input {
+        padding-right: 35px !important; /* Place garantie pour le symbole */
+        text-align: right;
+    }
+    
+    /* CORRECTIF ULTIME : Remontée du bloc Pilotage */
+    .project-specific-section {
+        margin-top: 10px !important; /* Réduit l'espace (était 20px) */
+        padding-top: 10px !important;
+        border-top: 1px dashed #e0e0e0;
+    }
+    
+    /* Ajustement fin pour le label Mandatory centré */
+    .mandatory-label {
+        text-align: center;
+        width: 100%;
+        display: block;
+    }
+</style>
+
 </head>
 <body>
 <div class="sidebar" id="sidebar">
@@ -1333,53 +1399,90 @@
 <div class="modal-content">
 <h3 id="project-modal-title">Ajouter un besoin</h3>
 <form id="project-form">
-<input id="project-id" type="hidden"/>
-<div>
-<label for="project-type">Type de besoin</label>
-<select id="project-type" required="">
-<option value="Projet">📂 Projet</option>
-<option value="Demande">🎫 Demande</option>
-</select>
-</div>
-<div>
-<label for="project-name">Nom</label>
-<input id="project-name" required="" type="text"/>
-</div>
-<div>
-<label for="project-sponsor">Sponsor</label>
-<select id="project-sponsor" required=""></select>
-</div>
-<div>
-<label for="project-status">Statut</label>
-<select id="project-status" required="">
-<option value="À faire">À faire</option>
-<option value="En cours">En cours</option>
-<option value="Terminé">Terminé</option>
-</select>
-</div>
-<div>
-<label for="project-start">Début</label>
-<input id="project-start" required="" type="date"/>
-</div>
-<div>
-<label for="project-end">Fin</label>
-<input id="project-end" required="" type="date"/>
 
-<div class="mandatory-wrapper">
-<input id="project-mandatory" style="width: auto; margin: 0; cursor: pointer;" type="checkbox"/>
-<label for="project-mandatory" style="margin: 0; color: var(--nord11); font-weight: bold; cursor: pointer;">
-                ⚠️ Mandatory (Impératif)
-            </label>
+<input id="project-id" type="hidden"/>
+
+<div style="grid-column: 1;">
+    <label for="project-type" style="font-size:0.9em; margin-bottom:4px;">Type de besoin</label>
+    <select id="project-type" required style="width: 100%;">
+        <option value="Projet">📂 Projet</option>
+        <option value="Demande">🎫 Demande</option>
+    </select>
 </div>
+
+<div style="grid-column: 2; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 2px;">
+    <label for="project-mandatory" class="mandatory-label" style="font-size:0.9em; margin-bottom:8px; color:var(--nord11); font-weight:bold;">Impératif / Mandatory</label>
+    
+    <input id="project-mandatory" type="checkbox" style="transform: scale(1.5); margin: 0; cursor: pointer;"/>
+</div>
+
+<div style="grid-column: 1 / -1;">
+    <label for="project-name">Nom du projet / demande</label>
+    <input id="project-name" required type="text" style="font-weight:bold; background-color:#fcfcfc;"/>
+</div>
+
+
+
+
+
+<div style="grid-column: 1 / -1;">
+    <label for="project-jira-epic">🔗 Epic Jira Associée</label>
+    
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <div style="flex-grow: 1;">
+            <select id="project-jira-epic">
+                <option data-placeholder="true"></option>
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 5px;">
+            <button type="button" onclick="openSelectedJira()" title="Ouvrir la fiche de l'Epic"
+                    style="height: 38px; padding: 0 15px; background-color: var(--nord10); color: white; border: none; border-radius: 4px 0 0 4px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: opacity 0.2s;">
+                <span>Epic</span>
+                <span style="font-size: 1.1em;">↗</span>
+            </button>
+            
+            <button type="button" onclick="viewEpicTickets()" title="Voir la liste des tickets de cette Epic"
+                    style="height: 38px; padding: 0 15px; background-color: var(--nord9); color: white; border: none; border-radius: 0 4px 4px 0; border-left: 1px solid rgba(255,255,255,0.2); cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: opacity 0.2s;">
+                <span>Tickets</span>
+                <span style="font-size: 1.1em;">📋</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div>
+    <label for="project-sponsor">Sponsor</label>
+    <select id="project-sponsor" required></select>
 </div>
 <div>
-<label for="project-description">Description</label>
-<textarea id="project-description" rows="2"></textarea>
+    <label for="project-status">Statut</label>
+    <select id="project-status" required>
+        <option value="À faire">À faire</option>
+        <option value="En cours">En cours</option>
+        <option value="Terminé">Terminé</option>
+    </select>
+</div>
+
+<div>
+    <label for="project-start">Date de début</label>
+    <input id="project-start" required type="date"/>
 </div>
 <div>
-<label for="project-notes" style="color: var(--nord10);">📝 Notes / Suivi</label>
-<textarea id="project-notes" placeholder="RAS" rows="2"></textarea>
+    <label for="project-end">Date de fin</label>
+    <input id="project-end" required type="date"/>
 </div>
+
+<div>
+    <label for="project-description">Description</label>
+    <textarea id="project-description" rows="3" placeholder="Objectifs..." style="height: 80px; resize: none;"></textarea>
+</div>
+
+<div>
+    <label for="project-notes" style="color: var(--nord10);">📝 Notes / Suivi</label>
+    <textarea id="project-notes" placeholder="Notes internes..." rows="3" style="height: 80px; resize: none;"></textarea>
+</div>
+
 <div class="project-specific-section hidden" id="project-specific-fields" style="grid-column: 1 / -1;">
 <h4>🚀 Données de pilotage</h4>
 <div class="project-metrics-grid">
@@ -1564,6 +1667,93 @@
             };
 
             /* === FONCTIONS UTILITAIRES DÉFINIES DANS LE SCOPE === */
+            
+        
+        /* === INTEGRATION JIRA (Backend Cloud Run) === */
+        const FIREBASE_FUNCTION_URL = "https://get-jira-epics-993389286221.europe-west9.run.app"; 
+        const PROJECT_KEY = "TC, SPR, HY, EGP, GDOK, GD, SIAE, MFA, LY, RBT, SDP, SGSPI, SV, SUIV, EFC, EE, TBA, SIRM, ZSW, ER"; 
+        let jiraSlimSelect = null;
+
+        async function fetchJiraEpics() {
+            const selectId = '#project-jira-epic';
+            
+            // Si SlimSelect existe déjà, on ne recharge pas tout, on garde juste la logique
+            if (jiraSlimSelect) return;
+
+            try {
+                // 1. Appel initial pour remplir la liste
+                const response = await fetch(`${FIREBASE_FUNCTION_URL}?project=${PROJECT_KEY}`);
+                const json = await response.json();
+                
+                if (!json.success) throw new Error("Erreur Jira");
+
+                const options = json.data.map(epic => ({
+                    text: `[${epic.key}] ${epic.summary}`,
+                    value: epic.key
+                }));
+                options.unshift({text: '', value: '', placeholder: true});
+
+                // 2. Initialisation SlimSelect avec événement "afterChange"
+                jiraSlimSelect = new SlimSelect({
+                    select: selectId,
+                    data: options,
+                    settings: { 
+                        placeholderText: 'Rechercher une Epic...', 
+                        searchText: 'Aucun résultat.' 
+                    },
+                    events: {
+                        // C'est ICI que la magie opère : quand on choisit une Epic
+                        afterChange: (newVal) => {
+                            const selectedKey = newVal[0]?.value;
+                            if (selectedKey) {
+                                calculateEpicPoints(selectedKey);
+                            }
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error("Erreur Init Jira:", error);
+            }
+        }
+
+        // --- NOUVELLE FONCTION : Calculer la somme des tickets ---
+        async function calculateEpicPoints(epicKey) {
+            const workloadInput = document.getElementById('project-workload-est');
+            if (!workloadInput) return;
+            
+            // Petit effet visuel pour dire "Je réfléchis..."
+            const originalPlaceholder = workloadInput.placeholder;
+            workloadInput.value = '';
+            workloadInput.placeholder = "Calcul...";
+            workloadInput.style.backgroundColor = "#fff3cd"; // Jaune pâle
+
+            try {
+                // Appel au même backend, mais avec le paramètre epicKey
+                const response = await fetch(`${FIREBASE_FUNCTION_URL}?epicKey=${epicKey}`);
+                const json = await response.json();
+
+                if (json.success && json.data) {
+                    const points = json.data.totalPoints;
+                    const count = json.data.ticketCount;
+                    
+                    // Remplissage automatique
+                    workloadInput.value = points; // Met le total (ex: 6)
+                    
+                    // Feedback visuel (Vert = succès)
+                    workloadInput.style.backgroundColor = "#d4edda";
+                    setTimeout(() => workloadInput.style.backgroundColor = "", 1500);
+                    
+                    console.log(`Epic ${epicKey}: ${points} points sur ${count} tickets.`);
+                }
+            } catch (e) {
+                console.error("Erreur calcul points:", e);
+                workloadInput.placeholder = "Erreur";
+                workloadInput.style.backgroundColor = "#f8d7da";
+            }
+        }
+
+
             const formatDataForChart = (tasks) => [{ name: 'Planning', data: tasks.map(t => ({ x: `${t.mandatory ? '🔴 ' : ''}[${t.sponsor}] ${t.name}`, y: [new Date(t.start).getTime(), new Date(t.end).getTime()] })) }];
             
             const calculateWorkloadData = (tasks) => {
@@ -1940,6 +2130,7 @@
             };
             const openProjectModal = (taskId = null) => {
                 elements.projectForm.reset();
+                fetchJiraEpics(); // Chargement des données Jira
                 if (taskId) {
                     const task = currentTasks.find(t => t.id === taskId);
                     elements.projectModalTitle.textContent = "Modifier le besoin";
@@ -1953,6 +2144,13 @@
                     document.getElementById('project-mandatory').checked = task.mandatory === true;
                     document.getElementById('project-description').value = task.description;
                     document.getElementById('project-notes').value = task.notes || '';
+                    
+                    // Pre-remplissage Jira (avec petit délai pour SlimSelect)
+                    setTimeout(() => {
+                        if(jiraSlimSelect && task.jiraKey) {
+                            jiraSlimSelect.setSelected(task.jiraKey);
+                        }
+                    }, 100);
                     
                     // Remplissage des nouveaux champs spécifiques
                     document.getElementById('project-workload-est').value = task.estimatedWorkload || '';
@@ -2010,6 +2208,7 @@
                     mandatory: document.getElementById('project-mandatory').checked,
                     description: document.getElementById('project-description').value,
                     notes: document.getElementById('project-notes').value,
+                    jiraKey: document.getElementById('project-jira-epic').value,
                     
                     // Récupération des nouveaux champs
                     estimatedWorkload: document.getElementById('project-workload-est').value,
@@ -2211,7 +2410,7 @@ body { font-family: 'Segoe UI', Arial, sans-serif; color: #333; }
             gap: 15px;
         }
         /* Sur mobile, on repasse en 2x2 */
-        @media (max-width: 700px) {
+        @media (max-width: 900px) {
             .project-metrics-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
@@ -2371,6 +2570,72 @@ body { font-family: 'Segoe UI', Arial, sans-serif; color: #333; }
         .mini-card .arrow { margin-left: auto; color: var(--nord4); font-weight: bold; }
     
 </style>
+
+<style>
+    /* --- CORRECTIF LAYOUT COMPACT --- */
+    
+    /* 1. Élargissement pour le mode Paysage complet */
+    .modal-content { 
+        max-width: 1000px !important; 
+        padding: 20px 30px !important; /* Un peu moins de padding vertical */
+    }
+
+    /* 2. Réduction des espaces pour éviter l'ascenseur */
+    #project-form {
+        row-gap: 8px !important; /* Rapproche les lignes */
+    }
+    .modal-content label {
+        margin-top: 8px !important; /* Rapproche les titres des champs précédents */
+        font-size: 0.85em !important; /* Titres un peu plus discrets */
+    }
+    .modal-content input, .modal-content select, .modal-content textarea {
+        padding: 8px !important; /* Inputs un peu moins hauts */
+        margin-top: 2px !important;
+    }
+
+    /* 3. HOMOGÉNÉISATION JIRA (SlimSelect) */
+    .ss-main {
+        background-color: #fff !important;
+        border: 1px solid var(--nord4) !important;
+        border-radius: 6px !important;
+        padding: 2px !important; /* Ajustement fin */
+        min-height: 38px !important; /* Force la même hauteur que les inputs standards */
+        display: flex !important;
+        align-items: center !important;
+    }
+    .ss-content {
+        border: 1px solid var(--nord4) !important; /* Bordure menu déroulant cohérente */
+    }
+    /* Enlève le bleu du label Jira s'il reste des traces inline */
+    label[for="project-jira-epic"] {
+        color: #4c566a !important; /* Couleur standard */
+        font-weight: 500 !important; /* Graisse standard */
+    }
+</style>
+
+
+<style>
+    /* CORRECTIF ULTIME : Espace pour le symbole € */
+    .input-wrapper input {
+        padding-right: 35px !important; /* Place garantie pour le symbole */
+        text-align: right;
+    }
+    
+    /* CORRECTIF ULTIME : Remontée du bloc Pilotage */
+    .project-specific-section {
+        margin-top: 10px !important; /* Réduit l'espace (était 20px) */
+        padding-top: 10px !important;
+        border-top: 1px dashed #e0e0e0;
+    }
+    
+    /* Ajustement fin pour le label Mandatory centré */
+    .mandatory-label {
+        text-align: center;
+        width: 100%;
+        display: block;
+    }
+</style>
+
 </head>
 <body>
 ${emailBody}
@@ -2418,5 +2683,31 @@ ${emailBody}
     }
     
 </script>
+
+
+
+<script>
+    // --- Ouvre la fiche de l'Epic elle-même ---
+    function openSelectedJira() {
+        const select = document.getElementById('project-jira-epic');
+        const key = select.value;
+        if (!key) { alert("Veuillez sélectionner une Epic."); return; }
+        
+        const url = `https://genilink.atlassian.net/browse/${key}`;
+        window.open(url, '_blank');
+    }
+
+    // --- Ouvre la recherche filtrée sur les enfants de l'Epic ---
+    function viewEpicTickets() {
+        const select = document.getElementById('project-jira-epic');
+        const key = select.value;
+        if (!key) { alert("Veuillez sélectionner une Epic."); return; }
+        
+        // Utilisation du JQL moderne "parent = CLE" pour trouver les sous-tâches et tickets liés
+        const jql = `parent = ${key} ORDER BY created DESC`;
+        const url = `https://genilink.atlassian.net/issues/?jql=${encodeURIComponent(jql)}`;
+        
+        window.open(url, '_blank');
+    }
+</script>
 </body>
-</html>
