@@ -3329,10 +3329,10 @@
                     const task = currentTasks.find(t => t.id === taskId);
                     elements.projectModalTitle.textContent = "Modifier le besoin";
                     document.getElementById('project-id').value = task.id;
-                    document.getElementById('project-type').value = task.type || 'Projet';
+                    const typeVal = task.type || 'Projet'; document.getElementById('project-type').value = typeVal; updateTypeSwitch(typeVal);
                     document.getElementById('project-name').value = task.name;
                     document.getElementById('project-sponsor').value = task.sponsor;
-                    document.getElementById('project-status').value = task.status;
+                    document.getElementById('project-status').value = task.status; setStatus(task.status);
                     document.getElementById('project-start').value = task.start;
                     document.getElementById('project-end').value = task.end;
                     document.getElementById('project-mandatory').checked = task.mandatory === true;
