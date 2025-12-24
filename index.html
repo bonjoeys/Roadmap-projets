@@ -2045,6 +2045,7 @@
         color: #475569 !important; /* Couleur texte légende plus lisible */
     }
     </style>
+<style>#ai-flash-container { font-family: 'Inter', sans-serif; animation: slideDown 0.6s ease-out; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } @media (max-width: 800px) { #ai-content-state > div { border-right: none !important; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 15px; } #ai-content-state > div:last-child { border-bottom: none; margin-bottom: 0; } } </style>
 </head>
 <body>
 <div class="sidebar" id="sidebar">
@@ -2095,6 +2096,31 @@
 <div class="stat-pill" onclick="document.querySelector('[data-tab=dashboard-container]').click()" style="background: rgba(191, 97, 106, 0.2); border-color: rgba(191, 97, 106, 0.4);">
 <span class="num" id="home-late-count" style="color: #fff;">-</span>
 <span class="label">En retard</span>
+</div>
+</div>
+</div>
+<div id="ai-flash-container" style="display: none; background: #fff; border-left: 5px solid #8fbcbb; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); margin: 20px 0 30px 0; padding: 25px;">
+<div id="ai-loading-state" style="display: flex; align-items: center; gap: 15px; color: #5e81ac; font-weight: 500;">
+<div class="spinner" style="width: 22px; height: 22px; border: 3px solid #e2e8f0; border-top: 3px solid #5e81ac; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+<span>L'assistant analyse votre portefeuille...</span>
+</div>
+<div id="ai-content-state" style="display: none; flex-wrap: wrap; gap: 0;">
+<div style="flex-basis: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
+<div style="display: flex; align-items: center; gap: 10px;">
+<span style="font-size: 1.5em;">✨</span><strong style="color: #2e3440; font-size: 1.1em;">Flash Info &amp; Conseils</strong>
+</div>
+</div>
+<div style="flex: 1; min-width: 250px; padding-right: 20px; border-right: 1px solid #f1f5f9;">
+<div style="color: #a3be8c; font-weight: 800; font-size: 0.8em; margin-bottom: 8px; text-transform: uppercase;">✅ Points Forts</div>
+<p id="ai-positive-text" style="margin: 0; font-size: 0.95em; line-height: 1.5; color: #4c566a;">...</p>
+</div>
+<div style="flex: 1; min-width: 250px; padding: 0 20px; border-right: 1px solid #f1f5f9;">
+<div style="color: #bf616a; font-weight: 800; font-size: 0.8em; margin-bottom: 8px; text-transform: uppercase;">⚠️ Vigilance</div>
+<p id="ai-alert-text" style="margin: 0; font-size: 0.95em; line-height: 1.5; color: #4c566a;">...</p>
+</div>
+<div style="flex: 1; min-width: 250px; padding-left: 20px;">
+<div style="color: #ebcb8b; font-weight: 800; font-size: 0.8em; margin-bottom: 8px; text-transform: uppercase;">💡 Conseil</div>
+<p id="ai-advice-text" style="margin: 0; font-size: 0.95em; line-height: 1.5; color: #4c566a;">...</p>
 </div>
 </div>
 </div>
@@ -2249,177 +2275,159 @@
 </div>
 </div>
 </div>
-
 <div class="docs-container content-tab hidden" id="docs-container">
-    <div class="dashboard-card" style="padding: 40px; max-width: 1200px; margin: 0 auto;">
-        
-        <div style="border-bottom: 3px solid var(--nord10); padding-bottom: 20px; margin-bottom: 30px;">
-            <h2 style="color: var(--nord0); font-size: 1.8em; margin: 0;">📘 Manuel de Référence & Guide Utilisateur</h2>
-            <p style="color: var(--nord3); font-size: 1.1em; margin-top: 10px;">
+<div class="dashboard-card" style="padding: 40px; max-width: 1200px; margin: 0 auto;">
+<div style="border-bottom: 3px solid var(--nord10); padding-bottom: 20px; margin-bottom: 30px;">
+<h2 style="color: var(--nord0); font-size: 1.8em; margin: 0;">📘 Manuel de Référence &amp; Guide Utilisateur</h2>
+<p style="color: var(--nord3); font-size: 1.1em; margin-top: 10px;">
                 Comprendre la philosophie, les concepts clés et l'utilisation avancée de la Roadmap Digitale.
             </p>
-        </div>
-
-        <section style="margin-bottom: 50px;">
-            <h3 style="color: var(--nord10); font-weight: 700; font-size: 1.4em; display: flex; align-items: center; gap: 10px;">
-                <span style="background: var(--nord10); color: #fff; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.8em;">1</span>
-                Vision & Objectifs de l'Application
+</div>
+<section style="margin-bottom: 50px;">
+<h3 style="color: var(--nord10); font-weight: 700; font-size: 1.4em; display: flex; align-items: center; gap: 10px;">
+<span style="background: var(--nord10); color: #fff; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.8em;">1</span>
+                Vision &amp; Objectifs de l'Application
             </h3>
-            <div style="background: #f8fafc; border-left: 5px solid var(--nord10); padding: 20px; border-radius: 4px; margin-top: 15px;">
-                <p style="margin: 0; line-height: 1.6; color: #4c566a;">
+<div style="background: #f8fafc; border-left: 5px solid var(--nord10); padding: 20px; border-radius: 4px; margin-top: 15px;">
+<p style="margin: 0; line-height: 1.6; color: #4c566a;">
                     Cette application est un outil de <strong>pilotage stratégique et opérationnel</strong> destiné à la direction du Digital. 
                     Elle ne sert pas uniquement à lister des tâches, mais à :
                 </p>
-                <ul style="margin-top: 15px; color: #4c566a; line-height: 1.6;">
-                    <li><strong>Centraliser</strong> l'ensemble des besoins (projets d'envergure et demandes courantes) en un point unique.</li>
-                    <li><strong>Arbitrer</strong> les priorités en visualisant la charge de travail et les budgets engagés.</li>
-                    <li><strong>Communiquer</strong> efficacement avec les Sponsors (Métiers) grâce à des vues dédiées et des rapports automatisés.</li>
-                    <li><strong>Sécuriser</strong> les livraisons en identifiant les dérives (délais, coûts, surcharge) avant qu'elles ne deviennent critiques.</li>
-                </ul>
-            </div>
-        </section>
-
-        <section style="margin-bottom: 50px;">
-            <h3 style="color: var(--nord10); font-weight: 700; font-size: 1.4em; display: flex; align-items: center; gap: 10px;">
-                <span style="background: var(--nord10); color: #fff; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.8em;">2</span>
-                Concepts Clés : Distinguer Projet & Demande
+<ul style="margin-top: 15px; color: #4c566a; line-height: 1.6;">
+<li><strong>Centraliser</strong> l'ensemble des besoins (projets d'envergure et demandes courantes) en un point unique.</li>
+<li><strong>Arbitrer</strong> les priorités en visualisant la charge de travail et les budgets engagés.</li>
+<li><strong>Communiquer</strong> efficacement avec les Sponsors (Métiers) grâce à des vues dédiées et des rapports automatisés.</li>
+<li><strong>Sécuriser</strong> les livraisons en identifiant les dérives (délais, coûts, surcharge) avant qu'elles ne deviennent critiques.</li>
+</ul>
+</div>
+</section>
+<section style="margin-bottom: 50px;">
+<h3 style="color: var(--nord10); font-weight: 700; font-size: 1.4em; display: flex; align-items: center; gap: 10px;">
+<span style="background: var(--nord10); color: #fff; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.8em;">2</span>
+                Concepts Clés : Distinguer Projet &amp; Demande
             </h3>
-            <p style="color: #64748b; margin-bottom: 20px;">
+<p style="color: #64748b; margin-bottom: 20px;">
                 La distinction est fondamentale car elle impacte le suivi budgétaire et le calcul des KPIs.
             </p>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-                <div style="border: 1px solid var(--nord4); border-radius: 8px; overflow: hidden;">
-                    <div style="background: linear-gradient(135deg, #fff7ed 0%, #fff 100%); padding: 15px; border-bottom: 1px solid var(--nord4);">
-                        <strong style="color: #ea580c; font-size: 1.2em;">📂 Le Projet</strong>
-                    </div>
-                    <div style="padding: 20px; font-size: 0.95em; color: #4c566a; line-height: 1.6;">
-                        <p><strong>C'est quoi ?</strong> Une initiative structurante, avec un début et une fin clairs, nécessitant un investissement spécifique.</p>
-                        <ul style="padding-left: 20px;">
-                            <li><strong>Impact :</strong> Fort impact business ou technique.</li>
-                            <li><strong>Pilotage :</strong> Nécessite un suivi fin du Budget (€), de la Charge (Jours) et de l'Avancement (%).</li>
-                            <li><strong>KPIs :</strong> Calcule automatiquement la Dérive et l'Efficacité.</li>
-                        </ul>
-                        <div style="margin-top: 10px; font-style: italic; color: #ea580c;">Exemple : Refonte du site web, Migration de serveur.</div>
-                    </div>
-                </div>
-
-                <div style="border: 1px solid var(--nord4); border-radius: 8px; overflow: hidden;">
-                    <div style="background: linear-gradient(135deg, #f0f9ff 0%, #fff 100%); padding: 15px; border-bottom: 1px solid var(--nord4);">
-                        <strong style="color: #5e81ac; font-size: 1.2em;">🎫 La Demande (BAU)</strong>
-                    </div>
-                    <div style="padding: 20px; font-size: 0.95em; color: #4c566a; line-height: 1.6;">
-                        <p><strong>C'est quoi ?</strong> Business As Usual. Maintenance, petites évolutions, support ou corrections.</p>
-                        <ul style="padding-left: 20px;">
-                            <li><strong>Impact :</strong> Faible unitairement, mais volumineux en masse.</li>
-                            <li><strong>Pilotage :</strong> Suivi principalement par le statut et les dates. Pas de suivi budgétaire strict.</li>
-                            <li><strong>KPIs :</strong> Compte dans la charge globale mais n'impacte pas les alertes financières.</li>
-                        </ul>
-                        <div style="margin-top: 10px; font-style: italic; color: #5e81ac;">Exemple : Changement de logo, Correction de bug, Export de données.</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section>
-            <h3 style="color: var(--nord10); font-weight: 700; font-size: 1.4em; display: flex; align-items: center; gap: 10px; margin-bottom: 25px;">
-                <span style="background: var(--nord10); color: #fff; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.8em;">3</span>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+<div style="border: 1px solid var(--nord4); border-radius: 8px; overflow: hidden;">
+<div style="background: linear-gradient(135deg, #fff7ed 0%, #fff 100%); padding: 15px; border-bottom: 1px solid var(--nord4);">
+<strong style="color: #ea580c; font-size: 1.2em;">📂 Le Projet</strong>
+</div>
+<div style="padding: 20px; font-size: 0.95em; color: #4c566a; line-height: 1.6;">
+<p><strong>C'est quoi ?</strong> Une initiative structurante, avec un début et une fin clairs, nécessitant un investissement spécifique.</p>
+<ul style="padding-left: 20px;">
+<li><strong>Impact :</strong> Fort impact business ou technique.</li>
+<li><strong>Pilotage :</strong> Nécessite un suivi fin du Budget (€), de la Charge (Jours) et de l'Avancement (%).</li>
+<li><strong>KPIs :</strong> Calcule automatiquement la Dérive et l'Efficacité.</li>
+</ul>
+<div style="margin-top: 10px; font-style: italic; color: #ea580c;">Exemple : Refonte du site web, Migration de serveur.</div>
+</div>
+</div>
+<div style="border: 1px solid var(--nord4); border-radius: 8px; overflow: hidden;">
+<div style="background: linear-gradient(135deg, #f0f9ff 0%, #fff 100%); padding: 15px; border-bottom: 1px solid var(--nord4);">
+<strong style="color: #5e81ac; font-size: 1.2em;">🎫 La Demande (BAU)</strong>
+</div>
+<div style="padding: 20px; font-size: 0.95em; color: #4c566a; line-height: 1.6;">
+<p><strong>C'est quoi ?</strong> Business As Usual. Maintenance, petites évolutions, support ou corrections.</p>
+<ul style="padding-left: 20px;">
+<li><strong>Impact :</strong> Faible unitairement, mais volumineux en masse.</li>
+<li><strong>Pilotage :</strong> Suivi principalement par le statut et les dates. Pas de suivi budgétaire strict.</li>
+<li><strong>KPIs :</strong> Compte dans la charge globale mais n'impacte pas les alertes financières.</li>
+</ul>
+<div style="margin-top: 10px; font-style: italic; color: #5e81ac;">Exemple : Changement de logo, Correction de bug, Export de données.</div>
+</div>
+</div>
+</div>
+</section>
+<section>
+<h3 style="color: var(--nord10); font-weight: 700; font-size: 1.4em; display: flex; align-items: center; gap: 10px; margin-bottom: 25px;">
+<span style="background: var(--nord10); color: #fff; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.8em;">3</span>
                 Guide Détaillé : Onglet par Onglet
             </h3>
-
-            <div style="margin-bottom: 30px;">
-                <h4 style="color: var(--nord0); border-bottom: 2px solid var(--nord6); padding-bottom: 8px;">🏠 Accueil</h4>
-                <p style="color: #4c566a; margin-top: 5px;"><strong>La Tour de Contrôle.</strong></p>
-                <ul style="color: #64748b; line-height: 1.6;">
-                    <li><strong>Utilisation :</strong> Point d'entrée quotidien. Affiche les compteurs globaux (Total, En cours, En retard) en temps réel.</li>
-                    <li><strong>Valeur Ajoutée :</strong> Permet d'accéder rapidement aux fonctions clés (Créer un besoin, Voir le planning) et d'avoir une "Météo" instantanée du service.</li>
-                </ul>
-            </div>
-
-            <div style="margin-bottom: 30px;">
-                <h4 style="color: var(--nord0); border-bottom: 2px solid var(--nord6); padding-bottom: 8px;">📊 Tableau de Bord</h4>
-                <p style="color: #4c566a; margin-top: 5px;"><strong>Le Pilotage Financier & Opérationnel.</strong></p>
-                <ul style="color: #64748b; line-height: 1.6;">
-                    <li><strong>Utilisation :</strong> Analyse des KPIs financiers (Budget engagé, Dérive charge, Efficacité). C'est ici que l'on repère les projets en danger (Top Alertes).</li>
-                    <li><strong>Sens :</strong> 
-                        <br>- <em>Dérive :</em> Si positive, on consomme plus de jours que prévu.
-                        <br>- <em>Efficacité :</em> Si < 100%, le projet coûte plus cher qu'il n'avance.
-                    </li>
-                    <li><strong>Valeur Ajoutée :</strong> Donne une vision "Macro" pour les comités de pilotage et l'arbitrage budgétaire.</li>
-                </ul>
-            </div>
-
-            <div style="margin-bottom: 30px;">
-                <h4 style="color: var(--nord0); border-bottom: 2px solid var(--nord6); padding-bottom: 8px;">📝 Planning & Saisie</h4>
-                <p style="color: #4c566a; margin-top: 5px;"><strong>Le Moteur de l'Application.</strong></p>
-                <ul style="color: #64748b; line-height: 1.6;">
-                    <li><strong>Utilisation :</strong> C'est la vue "Tableur". On y ajoute, modifie, supprime et filtre les besoins. C'est le seul endroit pour éditer les données.</li>
-                    <li><strong>Fonctionnalités Clés :</strong>
-                        <br>- <em>Exports :</em> PDF, Excel et Email (pour envoyer un flash report aux parties prenantes).
-                        <br>- <em>Filtres :</em> Par statut, sponsor, texte, ou "Mandatory".
-                    </li>
-                    <li><strong>Valeur Ajoutée :</strong> Gestion fine et administrative des tickets. C'est l'outil de travail du Chef de Projet au quotidien.</li>
-                </ul>
-            </div>
-
-            <div style="margin-bottom: 30px;">
-                <h4 style="color: var(--nord0); border-bottom: 2px solid var(--nord6); padding-bottom: 8px;">📅 Vue Gantt</h4>
-                <p style="color: #4c566a; margin-top: 5px;"><strong>La Planification Temporelle.</strong></p>
-                <ul style="color: #64748b; line-height: 1.6;">
-                    <li><strong>Utilisation :</strong> Visualiser les périodes d'activité de chaque projet sur une échelle de temps. La ligne rouge indique la date du jour.</li>
-                    <li><strong>Valeur Ajoutée :</strong> Permet de voir les chevauchements, la durée des projets et si nous sommes "dans les temps" par rapport à aujourd'hui.</li>
-                </ul>
-            </div>
-
-            <div style="margin-bottom: 30px;">
-                <h4 style="color: var(--nord0); border-bottom: 2px solid var(--nord6); padding-bottom: 8px;">⏳ Timeline Verticale</h4>
-                <p style="color: #4c566a; margin-top: 5px;"><strong>L'Histoire du Projet.</strong></p>
-                <ul style="color: #64748b; line-height: 1.6;">
-                    <li><strong>Utilisation :</strong> Présentation séquentielle des projets (du plus ancien au plus récent ou inversement). Idéal pour raconter l'histoire de l'année.</li>
-                    <li><strong>Valeur Ajoutée :</strong> Format très visuel pour les présentations ou les revues de roadmap annuelles. Plus lisible que le Gantt pour une liste séquentielle.</li>
-                </ul>
-            </div>
-
-            <div style="margin-bottom: 30px;">
-                <h4 style="color: var(--nord0); border-bottom: 2px solid var(--nord6); padding-bottom: 8px;">📈 Analyse de Charge</h4>
-                <p style="color: #4c566a; margin-top: 5px;"><strong>La Gestion Capacitaire.</strong></p>
-                <ul style="color: #64748b; line-height: 1.6;">
-                    <li><strong>Utilisation :</strong> Graphique de surface montrant le nombre de projets actifs <em>simultanément</em> à un instant T.</li>
-                    <li><strong>Valeur Ajoutée :</strong> Identifie les goulots d'étranglement (ex: "Attention, en Mars nous avons 15 projets en parallèle, l'équipe ne pourra pas suivre"). Aide à lisser la charge.</li>
-                </ul>
-            </div>
-
-            <div style="margin-bottom: 30px;">
-                <h4 style="color: var(--nord0); border-bottom: 2px solid var(--nord6); padding-bottom: 8px;">🚦 Répartition par Statut</h4>
-                <p style="color: #4c566a; margin-top: 5px;"><strong>La Santé du Flux (Workflow).</strong></p>
-                <ul style="color: #64748b; line-height: 1.6;">
-                    <li><strong>Utilisation :</strong> Diagramme circulaire montrant la proportion "À faire" / "En cours" / "Terminé".</li>
-                    <li><strong>Valeur Ajoutée :</strong> Vérifier qu'on ne stocke pas trop de tâches (trop de "À faire") ou qu'on ne se disperse pas trop (trop de "En cours").</li>
-                </ul>
-            </div>
-
-            <div style="margin-bottom: 30px;">
-                <h4 style="color: var(--nord0); border-bottom: 2px solid var(--nord6); padding-bottom: 8px;">👥 Projets par Sponsor</h4>
-                <p style="color: #4c566a; margin-top: 5px;"><strong>L'Équilibre Politique.</strong></p>
-                <ul style="color: #64748b; line-height: 1.6;">
-                    <li><strong>Utilisation :</strong> Classement des sponsors par volume de demandes.</li>
-                    <li><strong>Valeur Ajoutée :</strong> Objectiver la consommation des ressources du service Digital. "Qui nous sollicite le plus ?". Utile pour la refacturation ou la négociation de ressources.</li>
-                </ul>
-            </div>
-            
-             <div style="margin-bottom: 0px;">
-                <h4 style="color: var(--nord0); border-bottom: 2px solid var(--nord6); padding-bottom: 8px;">🚀 Avancement par Sponsor</h4>
-                <p style="color: #4c566a; margin-top: 5px;"><strong>La Vue Client Interne.</strong></p>
-                <ul style="color: #64748b; line-height: 1.6;">
-                    <li><strong>Utilisation :</strong> Montre pour chaque sponsor l'état de SES projets.</li>
-                    <li><strong>Valeur Ajoutée :</strong> Permet de dire à un métier spécifique : "Voilà où nous en sommes pour vous". Identifie si un métier est bloqué (tout est "En cours") ou si tout roule.</li>
-                </ul>
-            </div>
-
-        </section>
-    </div>
+<div style="margin-bottom: 30px;">
+<h4 style="color: var(--nord0); border-bottom: 2px solid var(--nord6); padding-bottom: 8px;">🏠 Accueil</h4>
+<p style="color: #4c566a; margin-top: 5px;"><strong>La Tour de Contrôle.</strong></p>
+<ul style="color: #64748b; line-height: 1.6;">
+<li><strong>Utilisation :</strong> Point d'entrée quotidien. Affiche les compteurs globaux (Total, En cours, En retard) en temps réel.</li>
+<li><strong>Valeur Ajoutée :</strong> Permet d'accéder rapidement aux fonctions clés (Créer un besoin, Voir le planning) et d'avoir une "Météo" instantanée du service.</li>
+</ul>
 </div>
-
+<div style="margin-bottom: 30px;">
+<h4 style="color: var(--nord0); border-bottom: 2px solid var(--nord6); padding-bottom: 8px;">📊 Tableau de Bord</h4>
+<p style="color: #4c566a; margin-top: 5px;"><strong>Le Pilotage Financier &amp; Opérationnel.</strong></p>
+<ul style="color: #64748b; line-height: 1.6;">
+<li><strong>Utilisation :</strong> Analyse des KPIs financiers (Budget engagé, Dérive charge, Efficacité). C'est ici que l'on repère les projets en danger (Top Alertes).</li>
+<li><strong>Sens :</strong>
+<br/>- <em>Dérive :</em> Si positive, on consomme plus de jours que prévu.
+                        <br/>- <em>Efficacité :</em> Si &lt; 100%, le projet coûte plus cher qu'il n'avance.
+                    </li>
+<li><strong>Valeur Ajoutée :</strong> Donne une vision "Macro" pour les comités de pilotage et l'arbitrage budgétaire.</li>
+</ul>
+</div>
+<div style="margin-bottom: 30px;">
+<h4 style="color: var(--nord0); border-bottom: 2px solid var(--nord6); padding-bottom: 8px;">📝 Planning &amp; Saisie</h4>
+<p style="color: #4c566a; margin-top: 5px;"><strong>Le Moteur de l'Application.</strong></p>
+<ul style="color: #64748b; line-height: 1.6;">
+<li><strong>Utilisation :</strong> C'est la vue "Tableur". On y ajoute, modifie, supprime et filtre les besoins. C'est le seul endroit pour éditer les données.</li>
+<li><strong>Fonctionnalités Clés :</strong>
+<br/>- <em>Exports :</em> PDF, Excel et Email (pour envoyer un flash report aux parties prenantes).
+                        <br/>- <em>Filtres :</em> Par statut, sponsor, texte, ou "Mandatory".
+                    </li>
+<li><strong>Valeur Ajoutée :</strong> Gestion fine et administrative des tickets. C'est l'outil de travail du Chef de Projet au quotidien.</li>
+</ul>
+</div>
+<div style="margin-bottom: 30px;">
+<h4 style="color: var(--nord0); border-bottom: 2px solid var(--nord6); padding-bottom: 8px;">📅 Vue Gantt</h4>
+<p style="color: #4c566a; margin-top: 5px;"><strong>La Planification Temporelle.</strong></p>
+<ul style="color: #64748b; line-height: 1.6;">
+<li><strong>Utilisation :</strong> Visualiser les périodes d'activité de chaque projet sur une échelle de temps. La ligne rouge indique la date du jour.</li>
+<li><strong>Valeur Ajoutée :</strong> Permet de voir les chevauchements, la durée des projets et si nous sommes "dans les temps" par rapport à aujourd'hui.</li>
+</ul>
+</div>
+<div style="margin-bottom: 30px;">
+<h4 style="color: var(--nord0); border-bottom: 2px solid var(--nord6); padding-bottom: 8px;">⏳ Timeline Verticale</h4>
+<p style="color: #4c566a; margin-top: 5px;"><strong>L'Histoire du Projet.</strong></p>
+<ul style="color: #64748b; line-height: 1.6;">
+<li><strong>Utilisation :</strong> Présentation séquentielle des projets (du plus ancien au plus récent ou inversement). Idéal pour raconter l'histoire de l'année.</li>
+<li><strong>Valeur Ajoutée :</strong> Format très visuel pour les présentations ou les revues de roadmap annuelles. Plus lisible que le Gantt pour une liste séquentielle.</li>
+</ul>
+</div>
+<div style="margin-bottom: 30px;">
+<h4 style="color: var(--nord0); border-bottom: 2px solid var(--nord6); padding-bottom: 8px;">📈 Analyse de Charge</h4>
+<p style="color: #4c566a; margin-top: 5px;"><strong>La Gestion Capacitaire.</strong></p>
+<ul style="color: #64748b; line-height: 1.6;">
+<li><strong>Utilisation :</strong> Graphique de surface montrant le nombre de projets actifs <em>simultanément</em> à un instant T.</li>
+<li><strong>Valeur Ajoutée :</strong> Identifie les goulots d'étranglement (ex: "Attention, en Mars nous avons 15 projets en parallèle, l'équipe ne pourra pas suivre"). Aide à lisser la charge.</li>
+</ul>
+</div>
+<div style="margin-bottom: 30px;">
+<h4 style="color: var(--nord0); border-bottom: 2px solid var(--nord6); padding-bottom: 8px;">🚦 Répartition par Statut</h4>
+<p style="color: #4c566a; margin-top: 5px;"><strong>La Santé du Flux (Workflow).</strong></p>
+<ul style="color: #64748b; line-height: 1.6;">
+<li><strong>Utilisation :</strong> Diagramme circulaire montrant la proportion "À faire" / "En cours" / "Terminé".</li>
+<li><strong>Valeur Ajoutée :</strong> Vérifier qu'on ne stocke pas trop de tâches (trop de "À faire") ou qu'on ne se disperse pas trop (trop de "En cours").</li>
+</ul>
+</div>
+<div style="margin-bottom: 30px;">
+<h4 style="color: var(--nord0); border-bottom: 2px solid var(--nord6); padding-bottom: 8px;">👥 Projets par Sponsor</h4>
+<p style="color: #4c566a; margin-top: 5px;"><strong>L'Équilibre Politique.</strong></p>
+<ul style="color: #64748b; line-height: 1.6;">
+<li><strong>Utilisation :</strong> Classement des sponsors par volume de demandes.</li>
+<li><strong>Valeur Ajoutée :</strong> Objectiver la consommation des ressources du service Digital. "Qui nous sollicite le plus ?". Utile pour la refacturation ou la négociation de ressources.</li>
+</ul>
+</div>
+<div style="margin-bottom: 0px;">
+<h4 style="color: var(--nord0); border-bottom: 2px solid var(--nord6); padding-bottom: 8px;">🚀 Avancement par Sponsor</h4>
+<p style="color: #4c566a; margin-top: 5px;"><strong>La Vue Client Interne.</strong></p>
+<ul style="color: #64748b; line-height: 1.6;">
+<li><strong>Utilisation :</strong> Montre pour chaque sponsor l'état de SES projets.</li>
+<li><strong>Valeur Ajoutée :</strong> Permet de dire à un métier spécifique : "Voilà où nous en sommes pour vous". Identifie si un métier est bloqué (tout est "En cours") ou si tout roule.</li>
+</ul>
+</div>
+</section>
+</div>
+</div>
 <div class="content-tab hidden" id="status-split-container"><div class="dashboard-card" style="min-height: 480px; padding: 0;"><div class="card-header" style="margin: 20px 30px 10px 30px;">🚦 Répartition &amp; Santé du Portefeuille</div><div style="display: flex; flex-wrap: wrap; padding: 20px 30px;"><div style="flex: 2; min-width: 350px; display: flex; align-items: center; justify-content: center;"><div id="status-split-chart" style="width: 100%;"></div></div><div style="flex: 1; min-width: 250px; border-left: 1px solid #e2e8f0; padding-left: 30px; display: flex; flex-direction: column;"><div style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px dashed #e2e8f0;"><h4 style="margin: 0 0 15px 0; color: #64748b; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">LÉGENDE</h4><div style="display: flex; flex-direction: column; gap: 12px;"><div style="display: flex; align-items: center; gap: 10px;"><span style="width: 12px; height: 12px; background-color: #ebcb8b; border-radius: 3px;"></span><span style="font-size: 0.9em; color: #2e3440; font-weight: 500;">À faire</span></div><div style="display: flex; align-items: center; gap: 10px;"><span style="width: 12px; height: 12px; background-color: #d08770; border-radius: 3px;"></span><span style="font-size: 0.9em; color: #2e3440; font-weight: 500;">En cours</span></div><div style="display: flex; align-items: center; gap: 10px;"><span style="width: 12px; height: 12px; background-color: #a3be8c; border-radius: 3px;"></span><span style="font-size: 0.9em; color: #2e3440; font-weight: 500;">Terminé</span></div></div></div><h4 style="margin: 0 0 10px 0; color: #2e3440;">Analyse</h4><p style="font-size: 0.9em; color: #64748b; line-height: 1.6; margin-top: 10px;">Ce graphique synthétise la santé du portefeuille. Il permet de visualiser instantanément la proportion de sujets actifs par rapport aux tâches en attente ou terminées.</p></div></div></div></div>
 <div class="content-tab hidden" id="sponsor-split-container"><div class="dashboard-card" style="padding: 20px 30px;"><div class="card-header">👥 Volume de Projets par Sponsor</div><div style="margin-bottom: 20px;"><div id="sponsor-split-chart"></div><p class="chart-comment">Ce graphique illustre le volume total de besoins (Projets et Demandes) portés par chaque sponsor.</p></div></div></div>
 <div class="content-tab hidden" id="sponsor-status-container"><div class="dashboard-card" style="padding: 20px 30px;"><div class="card-header">🚀 Avancement Détaillé par Sponsor</div><div style="margin-bottom: 20px;"><div id="sponsor-status-chart"></div><p class="chart-comment">Ce visuel détaille l'état d'avancement des dossiers pour chaque sponsor, permettant d'identifier la charge active par pôle.</p></div></div></div>
@@ -2445,11 +2453,33 @@
 </div>
 <p class="project-counter-sync chart-counter" id="gantt-counter"></p>
 </div>
+<div id="gantt-ai-container" style="display: none; background: linear-gradient(to right, #f8fafc, #fff); border-left: 4px solid #5e81ac; border-radius: 8px; margin-bottom: 20px; padding: 15px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
+<div id="gantt-ai-loading" style="display: flex; align-items: center; gap: 15px; color: #5e81ac; font-size: 0.9em; font-weight: 500;">
+<div class="spinner" style="width: 18px; height: 18px; border: 2px solid #e2e8f0; border-top: 2px solid #5e81ac; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+<span>Analyse du planning affiché en cours...</span>
+</div>
+<div id="gantt-ai-content" style="display: none; font-size: 0.95em; color: #334155; line-height: 1.5;">
+<div style="display: flex; flex-wrap: wrap; gap: 20px;">
+<div style="flex: 1; min-width: 200px;">
+<span style="font-weight: 700; color: #a3be8c; text-transform: uppercase; font-size: 0.8em; display: block; margin-bottom: 4px;">✅ Points Forts</span>
+<span id="gantt-positive">...</span>
+</div>
+<div style="flex: 1; min-width: 200px;">
+<span style="font-weight: 700; color: #bf616a; text-transform: uppercase; font-size: 0.8em; display: block; margin-bottom: 4px;">⚠️ Vigilance</span>
+<span id="gantt-alert">...</span>
+</div>
+<div style="flex: 1; min-width: 200px;">
+<span style="font-weight: 700; color: #ebcb8b; text-transform: uppercase; font-size: 0.8em; display: block; margin-bottom: 4px;">💡 Conseil</span>
+<span id="gantt-advice">...</span>
+</div>
+</div>
+</div>
+</div>
 <div id="gantt-chart"></div>
 <p class="chart-comment">
-                    Ce diagramme illustre la chronologie sur une ligne de temps.<br/>
+                    Ce diagramme illustre la chronologie sur une ligne de temps.<br>
 <span class="comment-line-2">La ligne rouge verticale indique la date du jour.</span>
-</p>
+</br></p>
 </div>
 <div class="timeline-container content-tab hidden" id="timeline-container">
 <div class="chart-header">
@@ -2489,9 +2519,9 @@
 </div>
 <div class="timeline-wrapper" id="vertical-timeline-wrapper"></div>
 <p class="chart-comment">
-                    Cette vue affiche les besoins de manière chronologique le long d'un axe.<br/>
+                    Cette vue affiche les besoins de manière chronologique le long d'un axe.<br>
 <span class="comment-line-2">Utilisez les filtres pour trier par date de début ou de fin.</span>
-</p>
+</br></p>
 </div>
 <div class="workload-container content-tab hidden" id="workload-container">
 <div class="chart-header">
@@ -2511,11 +2541,56 @@
 </div>
 <p class="project-counter-sync chart-counter" id="workload-counter"></p>
 </div>
+<div id="workload-ai-container" style="display: none; background: linear-gradient(to right, #f8fafc, #fff); border-left: 4px solid #5e81ac; border-radius: 8px; margin-top: 20px; margin-bottom: 10px; padding: 15px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
+<div id="workload-ai-loading" style="display: flex; align-items: center; gap: 15px; color: #5e81ac; font-size: 0.9em; font-weight: 500;">
+<div class="spinner" style="width: 18px; height: 18px; border: 2px solid #e2e8f0; border-top: 2px solid #5e81ac; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+<span>Analyse de la charge en cours...</span>
+</div>
+<div id="workload-ai-content" style="display: none; font-size: 0.95em; color: #334155; line-height: 1.5;">
+<div style="display: flex; flex-wrap: wrap; gap: 20px;">
+<div style="flex: 1; min-width: 200px;">
+<span style="font-weight: 700; color: #a3be8c; text-transform: uppercase; font-size: 0.8em; display: block; margin-bottom: 4px;">✅ Points Forts</span>
+<span id="workload-ai-positive">...</span>
+</div>
+<div style="flex: 1; min-width: 200px;">
+<span style="font-weight: 700; color: #bf616a; text-transform: uppercase; font-size: 0.8em; display: block; margin-bottom: 4px;">⚠️ Vigilance</span>
+<span id="workload-ai-alert">...</span>
+</div>
+<div style="flex: 1; min-width: 200px;">
+<span style="font-weight: 700; color: #ebcb8b; text-transform: uppercase; font-size: 0.8em; display: block; margin-bottom: 4px;">💡 Conseil</span>
+<span id="workload-ai-advice">...</span>
+</div>
+</div>
+</div>
+</div>
+
 <div id="workload-chart"></div>
+<div id="workload-ai-container" style="display: none; background: linear-gradient(to right, #f8fafc, #fff); border-left: 4px solid #5e81ac; border-radius: 8px; margin-top: 20px; margin-bottom: 10px; padding: 15px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
+<div id="workload-ai-loading" style="display: flex; align-items: center; gap: 15px; color: #5e81ac; font-size: 0.9em; font-weight: 500;">
+<div class="spinner" style="width: 18px; height: 18px; border: 2px solid #e2e8f0; border-top: 2px solid #5e81ac; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+<span>Analyse de la charge en cours...</span>
+</div>
+<div id="workload-ai-content" style="display: none; font-size: 0.95em; color: #334155; line-height: 1.5;">
+<div style="display: flex; flex-wrap: wrap; gap: 20px;">
+<div style="flex: 1; min-width: 200px;">
+<span style="font-weight: 700; color: #a3be8c; text-transform: uppercase; font-size: 0.8em; display: block; margin-bottom: 4px;">✅ Points Forts</span>
+<span id="workload-ai-positive">...</span>
+</div>
+<div style="flex: 1; min-width: 200px;">
+<span style="font-weight: 700; color: #bf616a; text-transform: uppercase; font-size: 0.8em; display: block; margin-bottom: 4px;">⚠️ Vigilance</span>
+<span id="workload-ai-alert">...</span>
+</div>
+<div style="flex: 1; min-width: 200px;">
+<span style="font-weight: 700; color: #ebcb8b; text-transform: uppercase; font-size: 0.8em; display: block; margin-bottom: 4px;">💡 Conseil</span>
+<span id="workload-ai-advice">...</span>
+</div>
+</div>
+</div>
+</div>
 <p class="chart-comment">
-                    Ce graphique représente le nombre de besoins actifs simultanément.<br/>
+                    Ce graphique représente le nombre de besoins actifs simultanément.<br>
 <span class="comment-line-2">Il permet d'anticiper les périodes de forte charge.</span>
-</p>
+</br></p>
 </div>
 <div class="controls-container content-tab hidden printable-area" id="controls-container">
 <h2>Planning &amp; Saisie</h2>
@@ -3186,7 +3261,7 @@
             const refreshUI = () => {
                 let filteredTasks = applyFilters(currentTasks);
                 filteredTasks.sort((a, b) => new Date(a[sortBy]) - new Date(b[sortBy]));
-                displayedTasks = filteredTasks;
+                displayedTasks = filteredTasks; window.displayedTasks = displayedTasks; // PATCH IA GANTT
                 renderTable(displayedTasks); 
                 updateCharts(displayedTasks);
                 updateDashboard();
@@ -3216,7 +3291,7 @@
                 }
             };
 
-            const setCurrentTasks = (tasks) => {
+            const setCurrentTasks = (tasks) => { window.currentTasks = tasks; // PATCH IA
                 const tasksWithDefaults = tasks.map(task => {
                     let sponsor = task.sponsor, name = task.name;
                     if (!sponsor && name) {
@@ -4712,6 +4787,7 @@ Content-Type: text/html; charset=utf-8
     }
     </style>
     
+<style>#ai-flash-container { font-family: 'Inter', sans-serif; animation: slideDown 0.6s ease-out; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } @media (max-width: 800px) { #ai-content-state > div { border-right: none !important; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 15px; } #ai-content-state > div:last-child { border-bottom: none; margin-bottom: 0; } } </style>
 </head>
 <body>
 ${emailBody}
@@ -4852,6 +4928,219 @@ ${emailBody}
     
 });
 </script>
+<script>
+    /* === SCRIPT IA (Connecté aux données globales) === */
+    (function() {
+        let aiAnalysisDone = false; 
+        const CLOUD_URL = "https://assistant-pmo-993389286221.europe-west9.run.app";
 
+        window.triggerAutoAI = async function() {
+            if (aiAnalysisDone) return;
+            
+            const container = document.getElementById('ai-flash-container');
+            if(!container) return; 
+            
+            // VERIFICATION : On regarde window.currentTasks au lieu de juste currentTasks
+            const dataTasks = window.currentTasks;
+
+            if (!dataTasks || dataTasks.length === 0) {
+                console.log("IA: Attente des données...");
+                setTimeout(window.triggerAutoAI, 1500); 
+                return;
+            }
+
+            // Si on a des données, on affiche et on lance
+            container.style.display = 'block';
+
+            try {
+                const tasksSummary = dataTasks.map(t => ({
+                    name: t.name, sponsor: t.sponsor, status: t.status, end: t.end,
+                    budget_conso_pct: (t.estimatedWorkload > 0) ? Math.round((t.realWorkload / t.estimatedWorkload)*100) : 0,
+                    is_late: (new Date(t.end) < new Date() && t.status !== 'Terminé')
+                }));
+
+                const response = await fetch(CLOUD_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tasks: tasksSummary })
+                });
+
+                if (!response.ok) throw new Error("Erreur API");
+                const aiResult = await response.json();
+
+                document.getElementById('ai-positive-text').innerText = aiResult.positive || "Non disponible";
+                document.getElementById('ai-alert-text').innerText = aiResult.alert || "R.A.S";
+                document.getElementById('ai-advice-text').innerText = aiResult.advice || "Aucun conseil.";
+
+                document.getElementById('ai-loading-state').style.display = 'none';
+                document.getElementById('ai-content-state').style.display = 'flex';
+                aiAnalysisDone = true;
+
+            } catch (error) {
+                console.error("Erreur IA:", error);
+                document.getElementById('ai-loading-state').innerHTML = "<span style='color:#bf616a;'>Service IA indisponible.</span>";
+            }
+        };
+
+        // Démarrage : On attend un peu que Firebase remplisse window.currentTasks
+        window.addEventListener('load', () => {
+            setTimeout(window.triggerAutoAI, 2500);
+        });
+    })();
+    </script>
+<script>
+    (function() {
+        let ganttDebounceTimer;
+        
+        // Fonction principale qui lance l'analyse
+        window.runGanttAnalysis = async function() {
+            const ganttTab = document.getElementById('gantt-container');
+            if (ganttTab.classList.contains('hidden')) return; // On ne fait rien si on n'est pas sur le Gantt
+
+            const container = document.getElementById('gantt-ai-container');
+            if(!container) return;
+            
+            // 2. On récupère les tâches FILTRÉES (exposées par refreshUI)
+            const tasksToAnalyze = window.displayedTasks || window.currentTasks;
+
+            if (!tasksToAnalyze || tasksToAnalyze.length === 0) {
+                container.style.display = 'none'; // On cache si rien à afficher
+                return;
+            }
+
+            // Affichage de l'état "En cours"
+            container.style.display = 'block';
+            document.getElementById('gantt-ai-loading').style.display = 'flex';
+            document.getElementById('gantt-ai-content').style.display = 'none';
+
+            try {
+                // 3. Préparation légère des données pour l'IA
+                const summary = tasksToAnalyze.map(t => ({
+                    name: t.name, sponsor: t.sponsor, start: t.start, end: t.end, status: t.status,
+                    late: (new Date(t.end) < new Date() && t.status !== 'Terminé')
+                }));
+
+                // 4. Appel API
+                const response = await fetch("https://assistant-pmo-993389286221.europe-west9.run.app", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tasks: summary })
+                });
+
+                if (!response.ok) throw new Error("Erreur IA");
+                const result = await response.json();
+
+                // 5. Affichage des résultats
+                document.getElementById('gantt-positive').innerText = result.positive;
+                document.getElementById('gantt-alert').innerText = result.alert;
+                document.getElementById('gantt-advice').innerText = result.advice;
+
+                document.getElementById('gantt-ai-loading').style.display = 'none';
+                document.getElementById('gantt-ai-content').style.display = 'block';
+
+            } catch (error) {
+                console.error("Erreur Gantt IA:", error);
+                container.style.display = 'none'; // On cache discrètement en cas d'erreur
+            }
+        };
+
+        // --- AUTOMATISATION ---
+        // 1. Au changement d'onglet
+        document.querySelectorAll('.tab-link').forEach(tab => {
+            tab.addEventListener('click', () => {
+                if (tab.dataset.tab === 'gantt-container') {
+                    setTimeout(window.runGanttAnalysis, 500);
+                }
+            });
+        });
+
+        // 2. Au changement de filtres (avec délai de 1s pour éviter la surcharge)
+        document.querySelectorAll('.header-filter').forEach(filter => {
+            filter.addEventListener('change', () => {
+                clearTimeout(ganttDebounceTimer);
+                ganttDebounceTimer = setTimeout(window.runGanttAnalysis, 1000);
+            });
+        });
+    })();
+    </script>
+
+<script>
+    (function() {
+        let workloadDebounceTimer;
+        
+        window.runWorkloadAnalysis = async function() {
+            const workloadTab = document.getElementById('workload-container');
+            // Sécurité : on ne lance que si l'onglet est visible
+            if (workloadTab.classList.contains('hidden')) return;
+
+            const container = document.getElementById('workload-ai-container');
+            if(!container) return;
+            
+            // On récupère les tâches filtrées (exposées par refreshUI)
+            const tasksToAnalyze = window.displayedTasks || window.currentTasks;
+
+            if (!tasksToAnalyze || tasksToAnalyze.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+
+            // Affichage loader
+            container.style.display = 'block';
+            document.getElementById('workload-ai-loading').style.display = 'flex';
+            document.getElementById('workload-ai-content').style.display = 'none';
+
+            try {
+                // Préparation légère des données pour l'IA (Focus Charge)
+                // On envoie start/end pour que l'IA détecte les chevauchements
+                const summary = tasksToAnalyze.map(t => ({
+                    name: t.name, sponsor: t.sponsor, start: t.start, end: t.end, status: t.status
+                }));
+
+                // Appel API (Même endpoint que les autres assistants)
+                const response = await fetch("https://assistant-pmo-993389286221.europe-west9.run.app", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tasks: summary, context: 'workload' }) // Context hint optionnel
+                });
+
+                if (!response.ok) throw new Error("Erreur IA Workload");
+                const result = await response.json();
+
+                // Affichage résultats
+                document.getElementById('workload-ai-positive').innerText = result.positive || "Analyse terminée.";
+                document.getElementById('workload-ai-alert').innerText = result.alert || "R.A.S.";
+                document.getElementById('workload-ai-advice').innerText = result.advice || "Aucun conseil particulier.";
+
+                document.getElementById('workload-ai-loading').style.display = 'none';
+                document.getElementById('workload-ai-content').style.display = 'block';
+
+            } catch (error) {
+                console.error("Erreur Workload IA:", error);
+                container.style.display = 'none';
+            }
+        };
+
+        // --- AUTOMATISATION ---
+        // 1. Au changement d'onglet
+        document.querySelectorAll('.tab-link').forEach(tab => {
+            tab.addEventListener('click', () => {
+                if (tab.dataset.tab === 'workload-container') {
+                    setTimeout(window.runWorkloadAnalysis, 500);
+                }
+            });
+        });
+
+        // 2. Au changement de filtres (Debounce 1s)
+        document.querySelectorAll('.header-filter').forEach(filter => {
+            filter.addEventListener('change', () => {
+                const workloadTab = document.getElementById('workload-container');
+                if (!workloadTab.classList.contains('hidden')) {
+                    clearTimeout(workloadDebounceTimer);
+                    workloadDebounceTimer = setTimeout(window.runWorkloadAnalysis, 1000);
+                }
+            });
+        });
+    })();
+    </script>
 </body>
 </html>
