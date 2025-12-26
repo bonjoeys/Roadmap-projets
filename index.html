@@ -2686,7 +2686,8 @@
 <div class="half-col">
 <label class="lbl-fix">Sponsor</label>
 <div class="input-group-balanced">
-<select id="project-sponsor" required=""></select>
+<select id="project-sponsor" required="">
+                    <option value="Objectif Code">Objectif Code</option></select>
 <div style="width: 45px; height: 42px; flex-shrink: 0;"></div>
 </div>
 </div>
@@ -2733,7 +2734,7 @@
 <div class="v-stack">
 <div class="h-group"><label class="multiline-label">Charge estimée<span class="sub-label">(jours homme)</span></label><input id="project-workload-est" step="0.5" type="number"/></div>
 <div class="h-group"><label class="multiline-label">Charge réelle<span class="sub-label">(jours homme)</span></label><input id="project-workload-real" step="0.5" type="number"/></div>
-<div class="h-group"><label>Coût (€)</label><input id="project-budget" oninput="formatCurrencyInput(this)" type="text"/></div>
+<div class="h-group"><label>Coût estimé (€)</label><input id="project-budget" oninput="formatCurrencyInput(this)" type="text"/></div>
 <div class="h-group"><label>Avancement (%)</label><input id="project-completion" max="100" type="number"/></div>
 </div>
 </div>
@@ -2839,7 +2840,7 @@
             };
         });
         
-        const sponsors = ['AGREMENT', 'COMMERCE', 'COMPTABILITE', 'DIGITAL', 'FORMATION', 'L', 'MARKETING', 'NEOBIZ', 'NR', 'QUALITE', 'REGLEMENTAIRE', 'TECHNIQUE'];
+        const sponsors = ['AGREMENT', 'COMMERCE', 'COMPTABILITE', 'DIGITAL', 'FORMATION', 'L', 'MARKETING', 'NEOBIZ', 'NR', 'OBJECTIF CODE', 'QUALITE', 'REGLEMENTAIRE', 'TECHNIQUE'];
         
         // CONFIG GLOBALE FIREBASE
         let db;
@@ -2915,7 +2916,7 @@
                     text: `[${epic.key}] ${epic.summary}`,
                     value: epic.key
                 }));
-                options.unshift({text: '', value: '', placeholder: true});
+                options.unshift({text: '🚫 Pas d\'Epic (Vider la sélection)', value: ''});
 
                 // 2. Initialisation SlimSelect avec événement "afterChange"
                 jiraSlimSelect = new SlimSelect({
@@ -2931,6 +2932,15 @@
                             const selectedKey = newVal[0]?.value;
                             if (selectedKey) {
                                 calculateEpicPoints(selectedKey);
+                            } else {
+                                // FIX: Si on enlève l'Epic, on vide le champ charge estimée
+                                const workloadInput = document.getElementById('project-workload-est');
+                                if (workloadInput) {
+                                    workloadInput.value = '';
+                                    if(document.getElementById('project-budget')) document.getElementById('project-budget').value = '';
+                                    workloadInput.style.backgroundColor = ''; // On retire la couleur verte/jaune
+                                    workloadInput.placeholder = ''; 
+                                }
                             }
                         }
                     }
@@ -2971,7 +2981,14 @@
                     const estimatedDays = points * RATIO_POINTS_JOURS;
                     
                     // Remplissage automatique
-                    workloadInput.value = estimatedDays; 
+                    workloadInput.value = estimatedDays;
+                    
+                    // AUTOMATION JIRA : Mise à jour du Coût (x500)
+                    const costJira = estimatedDays * 500;
+                    const budgetInputJira = document.getElementById('project-budget');
+                    if(budgetInputJira) {
+                        budgetInputJira.value = costJira.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+                    } 
                     
                     // Feedback visuel (Vert = succès)
                     workloadInput.style.backgroundColor = "#d4edda";
@@ -3322,7 +3339,37 @@
                 }
             };
 
-            const renderTable = (tasks) => {
+            
+            // === SECURITY FIX : PROTECTION XSS ===
+            const escapeHTML = (str) => {
+                if (str === null || str === undefined) return '';
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            };
+    
+            
+    // === SYSTÈME TEMPS RÉEL (FIRESTORE) ===
+    const initRealTimeSync = () => {
+        console.log("📡 Connexion au flux temps réel...");
+        // On écoute la collection 'tasks'
+        db.collection("tasks").onSnapshot((snapshot) => {
+            const tasks = [];
+            snapshot.forEach((doc) => {
+                tasks.push({ id: doc.id, ...doc.data() });
+            });
+            console.log("🔄 Données reçues : " + tasks.length + " tâches.");
+            setCurrentTasks(tasks); // Met à jour l'affichage et les KPIs
+        }, (error) => {
+            console.error("Erreur synchro:", error);
+        });
+    };
+    
+
+    const renderTable = (tasks) => {
                 let tableHTML = `<table id="tasks-table"><thead><tr>
                     <th class="select-cell"><input type="checkbox" id="select-all-rows"></th>
                     <th class="type-cell">Type</th>
@@ -3361,8 +3408,8 @@
                     tableHTML += `<tr ondblclick="openProjectModal('${task.id}')">
                         <td class="select-cell"><input type="checkbox" class="row-checkbox" data-id="${task.id}"></td>
                         <td class="type-cell" title="${typeTitle}">${typeIcon}</td>
-                        <td>${task.sponsor}</td>
-                        <td>${task.name} ${task.mandatory ? '<span class="mandatory-badge" title="Impératif / Mandatory">M</span>' : ''} ${hasNotes}</td>
+                        <td>${escapeHTML(task.sponsor)}</td>
+                        <td>${escapeHTML(task.name)} ${task.mandatory ? '<span class="mandatory-badge" title="Impératif / Mandatory">M</span>' : ''} ${hasNotes}</td>
                         <td style="${startStyle}">${new Date(task.start).toLocaleDateString('fr-FR')}</td>
                         <td style="${endStyle}">${new Date(task.end).toLocaleDateString('fr-FR')}</td>
                         <td>${task.status}</td>
@@ -3385,7 +3432,7 @@
                             if (taskIndex > -1 && confirm(`Supprimer le besoin "${currentTasks[taskIndex].name}" ?`)) {
                                 tasks.splice(taskIndex, 1);
                                 refreshUI();
-                                saveRoadmap();
+                                // Auto-save
                             }
                         } else if (button.classList.contains('edit-task-btn')) {
                             openProjectModal(id);
@@ -3395,6 +3442,8 @@
             };
             const openProjectModal = (taskId = null) => {
                 elements.projectForm.reset();
+                // FIX : On vide la liste Jira visuellement pour éviter les résidus
+                if (typeof jiraSlimSelect !== 'undefined' && jiraSlimSelect) jiraSlimSelect.setSelected('');
 
                 const delBtn = document.getElementById('btn-delete-modal');
                 if(delBtn) delBtn.style.display = taskId ? 'block' : 'none';
@@ -3462,6 +3511,24 @@
             // Ecouteur sur le changement de type dans le formulaire
             document.getElementById('project-type').addEventListener('change', toggleProjectSpecificFields);
 
+            // --- AUTOMATION : Calcul Auto Coût Estimé (TJM 500) ---
+            const estWorkloadInput = document.getElementById('project-workload-est');
+            if (estWorkloadInput) {
+                estWorkloadInput.addEventListener('input', function() {
+                    // On remplace la virgule par un point pour le calcul
+                    const val = parseFloat(this.value.replace(',', '.')) || 0;
+                    
+                    // REGLE DE CALCUL : Charge x 500
+                    const cost = val * 500; 
+                    
+                    const budgetInput = document.getElementById('project-budget');
+                    if (budgetInput) {
+                        // Formatage avec espaces (ex: 1 500) pour faire propre
+                        budgetInput.value = cost.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+                    }
+                });
+            }
+
             document.getElementById('add-task-btn').addEventListener('click', () => openProjectModal());
             document.getElementById('cancel-project-btn').addEventListener('click', () => { elements.projectModal.classList.add('hidden'); });
 
@@ -3476,7 +3543,7 @@
                         currentTasks.splice(taskIndex, 1); // Correction: currentTasks
                         elements.projectModal.classList.add('hidden');
                         refreshUI();
-                        saveRoadmap();
+                        // Auto-save
                     }
                 }
             });
@@ -3504,17 +3571,34 @@
                     completion: document.getElementById('project-completion').value
                 };
 
-                if (id) { 
-                    const taskIndex = currentTasks.findIndex(t => t.id === id);
-                    if (taskIndex > -1) currentTasks[taskIndex] = { ...currentTasks[taskIndex], ...taskData };
-                } else { 
-                    taskData.id = `task_${new Date().getTime()}`;
-                    currentTasks.push(taskData);
-                }
                 
-                elements.projectModal.classList.add('hidden');
-                refreshUI();
-                saveRoadmap(); 
+        // === SAUVEGARDE INTELLIGENTE (NEW) ===
+        const collection = db.collection("tasks");
+        
+        // Si ID existe -> UPDATE, Sinon -> CREATE avec ID manuel
+        let promise;
+        if (id) {
+            promise = collection.doc(id).update(taskData);
+        } else {
+            // On génère un ID unique pour la nouvelle tâche
+            const newId = 'task_' + Date.now();
+            taskData.id = newId;
+            promise = collection.doc(newId).set(taskData);
+        }
+
+        promise.then(() => {
+            console.log("✅ Sauvegarde réussie en base");
+            elements.projectModal.classList.add('hidden');
+            elements.projectForm.reset();
+                // FIX : On vide la liste Jira visuellement pour éviter les résidus
+                if (typeof jiraSlimSelect !== 'undefined' && jiraSlimSelect) jiraSlimSelect.setSelected('');
+            // Le onSnapshot fera le rafraîchissement automatiquement
+        }).catch(error => {
+            console.error("Erreur sauvegarde:", error);
+            alert("Erreur lors de la sauvegarde : " + error.message);
+        });
+    
+                // Auto-save 
             });
 
             document.getElementById('kpi-card-total').addEventListener('click', () => { showKpiDetailsModal('Total des Besoins', currentTasks); });
@@ -4815,7 +4899,7 @@ ${emailBody}
             });
 
             populateSortFilters();
-            loadRoadmap();
+            initRealTimeSync();
         });
     
     function formatCurrencyInput(input) {
