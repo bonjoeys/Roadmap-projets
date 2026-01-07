@@ -9,6 +9,7 @@
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
 <script src="https://unpkg.com/slim-select@2.8.2/dist/slimselect.min.js"></script>
 <link href="https://unpkg.com/slim-select@2.8.2/dist/slimselect.css" rel="stylesheet"/>
 <style>
@@ -2046,6 +2047,64 @@
     }
     </style>
 <style>#ai-flash-container { font-family: 'Inter', sans-serif; animation: slideDown 0.6s ease-out; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } @media (max-width: 800px) { #ai-content-state > div { border-right: none !important; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 15px; } #ai-content-state > div:last-child { border-bottom: none; margin-bottom: 0; } } </style>
+
+<style>
+    /* === AJOUT PROFIL UTILISATEUR (SIDEBAR) === */
+    /* On convertit la sidebar en Flexbox pour gérer l'espacement vertical */
+    .sidebar {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+    }
+    
+    /* La navigation prend tout l'espace disponible pour pousser le profil en bas */
+    .tabs-nav {
+        flex-grow: 1 !important;
+        margin-bottom: 20px;
+    }
+
+    /* Style de la section Profil */
+    .user-profile-section {
+        margin-top: auto; /* Sécurité supplémentaire */
+        padding-top: 20px;
+        border-top: 1px solid #3b4252;
+        font-size: 0.9em;
+        background-color: var(--nord0); /* Même fond que sidebar */
+    }
+    
+    .user-email-display {
+        color: #88c0d0; /* Bleu Nord */
+        font-weight: 600;
+        margin-bottom: 12px;
+        word-break: break-all; /* Coupe si l'email est trop long */
+        font-size: 0.85em;
+        display: block;
+        padding-left: 5px;
+    }
+    
+    .btn-logout {
+        width: 100%;
+        background-color: #bf616a; /* Rouge Nord */
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-align: center;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .btn-logout:hover {
+        background-color: #d08770; /* Orange au survol */
+    }
+</style>
+
 </head>
 <body>
 <div class="sidebar" id="sidebar">
@@ -2062,6 +2121,17 @@
 <button class="tab-link" data-tab="sponsor-status-container">🚀 Avancement par sponsor</button>
 <button class="tab-link" data-tab="docs-container">📖 Documentation</button>
 </div>
+
+    <div class="user-profile-section" id="user-profile-section" style="display:none;">
+        <div style="color: #d8dee9; margin-bottom: 5px; font-size: 0.75em; text-transform:uppercase; letter-spacing:1px; opacity: 0.7; padding-left: 5px;">
+            Connecté en tant que
+        </div>
+        <span id="user-email-display" class="user-email-display">...</span>
+        
+        <button id="logout-btn" class="btn-logout">
+            <span>🚪</span> Déconnexion
+        </button>
+    </div>
 </div>
 <div class="main-content" id="main-content">
 <div class="top-bar">
@@ -4872,10 +4942,125 @@ Content-Type: text/html; charset=utf-8
     </style>
     
 <style>#ai-flash-container { font-family: 'Inter', sans-serif; animation: slideDown 0.6s ease-out; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } @media (max-width: 800px) { #ai-content-state > div { border-right: none !important; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 15px; } #ai-content-state > div:last-child { border-bottom: none; margin-bottom: 0; } } </style>
+
+<style>
+    /* === AJOUT PROFIL UTILISATEUR (SIDEBAR) === */
+    /* On convertit la sidebar en Flexbox pour gérer l'espacement vertical */
+    .sidebar {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+    }
+    
+    /* La navigation prend tout l'espace disponible pour pousser le profil en bas */
+    .tabs-nav {
+        flex-grow: 1 !important;
+        margin-bottom: 20px;
+    }
+
+    /* Style de la section Profil */
+    .user-profile-section {
+        margin-top: auto; /* Sécurité supplémentaire */
+        padding-top: 20px;
+        border-top: 1px solid #3b4252;
+        font-size: 0.9em;
+        background-color: var(--nord0); /* Même fond que sidebar */
+    }
+    
+    .user-email-display {
+        color: #88c0d0; /* Bleu Nord */
+        font-weight: 600;
+        margin-bottom: 12px;
+        word-break: break-all; /* Coupe si l'email est trop long */
+        font-size: 0.85em;
+        display: block;
+        padding-left: 5px;
+    }
+    
+    .btn-logout {
+        width: 100%;
+        background-color: #bf616a; /* Rouge Nord */
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-align: center;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .btn-logout:hover {
+        background-color: #d08770; /* Orange au survol */
+    }
+</style>
+
 </head>
 <body>
-${emailBody}
 
+
+
+
+ style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #eceff4; z-index: 5000; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+    <div class="login-card" style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 90%; border: 1px solid #e2e8f0;">
+        <img src="SGS_Logo.svg.png" alt="Logo" style="max-height: 60px; margin-bottom: 20px;">
+        <h2 style="color: #2e3440; margin-bottom: 10px; font-size: 1.5rem;">Connexion requise</h2>
+        <p style="color: #4c566a; margin-bottom: 30px; line-height: 1.5;">
+            Cette application est réservée aux utilisateurs autorisés. Veuillez vous identifier avec votre compte Google professionnel.
+        </p>
+        <button id="google-login-btn" style="background-color: #fff; color: #3c4043; border: 1px solid #dadce0; padding: 12px 20px; border-radius: 4px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; font-size: 1rem; transition: background 0.2s;">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" style="width: 18px; height: 18px;">
+            Se connecter avec Google
+        </button>
+        <div id="login-error" style="margin-top: 20px; color: #bf616a; font-size: 0.9em; display: none; background: #fff5f5; padding: 10px; border-radius: 6px; border: 1px solid #fc8181;"></div>
+        <div id="login-loader" style="display: none; margin-top: 20px; color: #5e81ac;">
+            <div class="spinner" style="width: 20px; height: 20px; border: 3px solid #e2e8f0; border-top: 3px solid #5e81ac; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px auto;"></div>
+            Vérification des droits...
+        </div>
+    </div>
+</div>
+
+
+<div id="login-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #f1f5f9; z-index: 5000; display: flex; align-items: center; justify-content: center; flex-direction: column; font-family: 'Inter', sans-serif;">
+    
+    <div class="login-card" style="background: white; padding: 40px 50px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); text-align: center; max-width: 420px; width: 90%; border: 1px solid #e2e8f0;">
+        
+        <img src="SGS_Logo.svg.png" alt="Logo" style="max-height: 50px; margin-bottom: 25px;">
+        
+        <h2 style="color: #0f172a; margin: 0 0 10px 0; font-size: 1.4rem; font-weight: 700;">Bienvenue sur la Roadmap</h2>
+        <p style="color: #64748b; margin: 0 0 30px 0; font-size: 1rem;">
+            Application de gestion des besoins.
+        </p>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+            <p style="color: #334155; margin-bottom: 15px; font-weight: 500; font-size: 0.95rem;">
+                Merci de vous authentifier via un compte Google.
+            </p>
+            
+            <button id="google-login-btn" style="background-color: #fff; color: #3c4043; border: 1px solid #cbd5e1; padding: 12px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; font-size: 0.95rem; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" style="width: 18px; height: 18px;">
+                Se connecter avec Google
+            </button>
+        </div>
+
+        <div id="login-error" style="margin-top: 15px; color: #b91c1c; font-size: 0.9em; display: none; background: #fef2f2; padding: 12px; border-radius: 6px; border: 1px solid #fecaca; text-align: left;"></div>
+        
+        <div id="login-loader" style="display: none; margin-top: 20px; color: #5e81ac;">
+            <div class="spinner" style="width: 24px; height: 24px; border: 3px solid #e2e8f0; border-top: 3px solid #5e81ac; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px auto;"></div>
+            <span style="font-size: 0.9em; font-weight: 500;">Vérification des accès...</span>
+        </div>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 0.85em; color: #94a3b8; line-height: 1.5;">
+            <span style="display:block; margin-bottom: 5px;">🔒 Accès restreint</span>
+            En cas de difficultés, rapprochez-vous du<br><strong>Service Digital au Siège</strong>.
+        </div>
+    </div>
+</div>
 
 </body>
 </html>`;
@@ -4899,8 +5084,101 @@ ${emailBody}
             });
 
             populateSortFilters();
-            initRealTimeSync();
+
+    /* === GESTION DE L'AUTHENTIFICATION & SÉCURITÉ (AJOUT AUTO) === */
+    const auth = firebase.auth();
+    const loginOverlay = document.getElementById('login-overlay');
+    const loginError = document.getElementById('login-error');
+    const loginLoader = document.getElementById('login-loader');
+    const loginBtn = document.getElementById('google-login-btn');
+
+    loginBtn.addEventListener('click', () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        auth.signInWithPopup(provider).catch((error) => {
+            loginError.style.display = 'block';
+            loginError.innerText = "Erreur : " + error.message;
         });
+    });
+
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            console.log("Utilisateur Google détecté :", user.email);
+            loginBtn.style.display = 'none';
+            loginError.style.display = 'none';
+            loginLoader.style.display = 'block';
+
+            try {
+                // VERIFICATION BDD : Le doc ID doit être l'email
+                const userDoc = await db.collection('users').doc(user.email).get();
+
+                if (userDoc.exists) {
+                    console.log("✅ Accès autorisé.");
+
+                    // --- GESTION PROFIL & LOGOUT (AJOUTE PAR SCRIPT) ---
+                    const userSection = document.getElementById('user-profile-section');
+                    const emailDisplay = document.getElementById('user-email-display');
+                    const logoutBtn = document.getElementById('logout-btn');
+
+                    if (userSection && emailDisplay) {
+                        // 1. Afficher la section et l'email
+                        userSection.style.display = 'block';
+                        emailDisplay.textContent = user.email;
+                        
+                        // 2. Gérer le clic sur Déconnexion
+                        if(logoutBtn) {
+                            // On clone pour éviter d'empiler les écouteurs si rechargement partiel
+                            const newBtn = logoutBtn.cloneNode(true);
+                            logoutBtn.parentNode.replaceChild(newBtn, logoutBtn);
+                            
+                            newBtn.addEventListener('click', async () => {
+                                if(confirm("Voulez-vous vraiment vous déconnecter ?")) {
+                                    try {
+                                        await auth.signOut();
+                                        window.location.reload(); // Recharger la page pour réafficher le login
+                                    } catch (e) {
+                                        console.error("Erreur déconnexion", e);
+                                        alert("Erreur lors de la déconnexion.");
+                                    }
+                                }
+                            });
+                        }
+                    }
+                    // ---------------------------------------------------
+
+                    loginOverlay.style.transition = "opacity 0.5s ease";
+                    loginOverlay.style.opacity = "0";
+                    setTimeout(() => { loginOverlay.style.display = 'none'; }, 500);
+
+                    // LANCEMENT DE L'APPLICATION
+                    populateSortFilters();
+                    initRealTimeSync(); 
+
+                } else {
+                    throw new Error("Unauthorized");
+                }
+            } catch (error) {
+                console.error("Erreur droits:", error);
+                await auth.signOut();
+                loginLoader.style.display = 'none';
+                loginBtn.style.display = 'flex';
+                loginError.style.display = 'block';
+                if(error.message === "Unauthorized") {
+                    loginError.innerText = "⛔ Désolé, l'email " + user.email + " n'est pas autorisé.";
+                } else {
+                    loginError.innerText = "Erreur de connexion BDD.";
+                }
+            }
+        } else {
+            loginOverlay.style.display = 'flex';
+            loginOverlay.style.opacity = '1';
+            loginBtn.style.display = 'flex';
+            loginLoader.style.display = 'none';
+            loginError.style.display = 'none';
+        }
+    });
+});
+
     
     function formatCurrencyInput(input) {
         // 1. On nettoie (on garde chiffres, point, virgule)
@@ -5226,5 +5504,43 @@ ${emailBody}
         });
     })();
     </script>
+
+
+<div id="login-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #f1f5f9; z-index: 5000; display: flex; align-items: center; justify-content: center; flex-direction: column; font-family: 'Inter', sans-serif;">
+    
+    <div class="login-card" style="background: white; padding: 40px 50px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); text-align: center; max-width: 420px; width: 90%; border: 1px solid #e2e8f0;">
+        
+        <img src="SGS_Logo.svg.png" alt="Logo" style="max-height: 50px; margin-bottom: 25px;">
+        
+        <h2 style="color: #0f172a; margin: 0 0 10px 0; font-size: 1.4rem; font-weight: 700;">Bienvenue sur la Roadmap</h2>
+        <p style="color: #64748b; margin: 0 0 30px 0; font-size: 1rem;">
+            Application de gestion des besoins.
+        </p>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+            <p style="color: #334155; margin-bottom: 15px; font-weight: 500; font-size: 0.95rem;">
+                Merci de vous authentifier via un compte Google.
+            </p>
+            
+            <button id="google-login-btn" style="background-color: #fff; color: #3c4043; border: 1px solid #cbd5e1; padding: 12px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; font-size: 0.95rem; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" style="width: 18px; height: 18px;">
+                Se connecter avec Google
+            </button>
+        </div>
+
+        <div id="login-error" style="margin-top: 15px; color: #b91c1c; font-size: 0.9em; display: none; background: #fef2f2; padding: 12px; border-radius: 6px; border: 1px solid #fecaca; text-align: left;"></div>
+        
+        <div id="login-loader" style="display: none; margin-top: 20px; color: #5e81ac;">
+            <div class="spinner" style="width: 24px; height: 24px; border: 3px solid #e2e8f0; border-top: 3px solid #5e81ac; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px auto;"></div>
+            <span style="font-size: 0.9em; font-weight: 500;">Vérification des accès...</span>
+        </div>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 0.85em; color: #94a3b8; line-height: 1.5;">
+            <span style="display:block; margin-bottom: 5px;">🔒 Accès restreint</span>
+            En cas de difficultés, rapprochez-vous du<br><strong>Service Digital au Siège</strong>.
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
