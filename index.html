@@ -2852,30 +2852,9 @@
         
         // LISTE D'EXEMPLE À REMPLACER PAR VOTRE EXPORT JSON
         // Format attendu : { name: "...", sponsor: "...", start: "YYYY-MM-DD", end: "YYYY-MM-DD" }
-        const rawData = [
-            { "sponsor": "AGREMENT", "name": "Validation des mouvements contrôleur dans le SIR", "status": "À faire" },
-            { "sponsor": "AGREMENT", "name": "Raccourci ajout d'une formation sur une fiche controleur / SIR", "status": "À faire" },
-            { "sponsor": "AGREMENT", "name": "Ajout d'une colonne \"activité de rattachement\" dans le tableau \"liste des contrôleurs\" sur le SIR", "status": "À faire" },
-            { "sponsor": "AGREMENT", "name": "Administration des notifications sur Pilote", "status": "À faire" },
-            { "sponsor": "AGREMENT", "name": "Gestion de plusieurs adresses de facturation pour une meme société dans le SIR", "status": "À faire" },
-            { "sponsor": "AGREMENT", "name": "Optimisation de la page de gestion des exploitants sur le SIR", "status": "À faire" },
-            { "sponsor": "COMPTABILITE", "name": "Ajout de filtre sur le SIR Compta", "status": "À faire" },
-            { "sponsor": "FORMATION", "name": "Optimisation navigation Formation / PILOTE", "description": "ne pas ressaisir la date d'embauche sur le BI, conservation des filtres pour la recherche de BI", "status": "À faire" },
-            { "sponsor": "FORMATION", "name": "Optimisation du parcours d'inscription aux formations", "status": "À faire" },
-            { "sponsor": "HOTLINE", "name": "Alertes service Chronopost", "status": "À faire" },
-            { "sponsor": "HOTLINE", "name": "Ajout lien Payzen sur Pilote", "status": "À faire" },
-            { "sponsor": "MARKETING", "name": "Retrait visuels campagne octobre rose", "status": "À faire" },
-            { "sponsor": "MARKETING", "name": "TMA Lemonway", "status": "En cours" },
-            { "sponsor": "MARKETING", "name": "Retrait du SMS de relance si véhicule pour vente", "status": "À faire" },
-            { "sponsor": "MARKETING", "name": "Retrait du label intégral sur les sites corpo", "status": "À faire" },
-            { "sponsor": "QUALITE", "name": "Récupération automatique des formations réseau dans l'IQC 05", "status": "À faire" },
-            { "sponsor": "QUALITE", "name": "Optimisation organisation des classeurs de la BQ", "description": "gestion attestations, affichages iqc", "status": "À faire" },
-            { "sponsor": "QUALITE", "name": "Affichage de l'audit correctif dans le TQC", "status": "À faire" },
-            { "sponsor": "QUALITE", "name": "Modification liste destinataires mails audits", "status": "À faire" },
-            { "sponsor": "TECHNIQUE", "name": "Optimisation navigation MGM", "status": "À faire" },
-            { "sponsor": "TECHNIQUE", "name": "Optimisations MCTI (gestion des couleurs)", "status": "À faire" },
-            { "sponsor": "COMMERCE", "name": "Evolution module stat de la page d'accueil de Pilote pour le nombre de CTP et rdv web", "status": "À faire" }
-        ]; 
+        // 🔒 SÉCURITÉ : Données en dur supprimées. 
+        // Les données sont chargées dynamiquement via Firebase après authentification.
+        const rawData = []; 
         
         // === TRANSFORMATION AUTOMATIQUE SELON VOS REGLES ===
         const initialTasks = rawData.map(item => {
@@ -2887,12 +2866,7 @@
             if(sponsor && sponsor.toUpperCase() === 'HOTLINE') {
                 sponsor = 'DIGITAL';
             }
-            
-            // 3. Règle Statut (Tout 'À faire' sauf 'lemonway' -> 'En cours')
-            // Note: le status est déjà fourni dans rawData, mais on peut forcer la règle au cas où
-            if(item.name && item.name.toLowerCase().includes('lemonway')) {
-                status = 'En cours';
-            }
+            // 3. Règle spécifique supprimée (Nettoyage Sécurité).
 
             // Dates par défaut si non fournies
             const start = item.start || "2025-01-01";
