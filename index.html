@@ -5066,15 +5066,42 @@ Content-Type: text/html; charset=utf-8
     const loginLoader = document.getElementById('login-loader');
     const loginBtn = document.getElementById('google-login-btn');
 
-    loginBtn.addEventListener('click', () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
-        auth.signInWithPopup(provider).catch((error) => {
-            loginError.style.display = 'block';
-            loginError.innerText = "Erreur : " + error.message;
-        });
+    
+    // === SÉCURITÉ : GESTION DE L'INACTIVITÉ (30 min) ===
+    let inactivityTimeout;
+    const MAX_INACTIVITY_TIME = 30 * 60 * 1000; // 30 minutes
+
+    const resetInactivityTimer = () => {
+        clearTimeout(inactivityTimeout);
+        // Si l'utilisateur est connecté, on relance le compte à rebours
+        if (auth.currentUser) {
+            inactivityTimeout = setTimeout(() => {
+                console.log("⏳ Inactivité détectée. Déconnexion automatique.");
+                alert("Votre session a expiré après 30 minutes d'inactivité.");
+                auth.signOut().then(() => window.location.reload());
+            }, MAX_INACTIVITY_TIME);
+        }
+    };
+    
+    // Événements surveillés pour réinitialiser le timer
+    ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt => {
+        document.addEventListener(evt, resetInactivityTimer);
     });
 
+    // === NOUVEAU LOGIN AVEC PERSISTANCE DE SESSION ===
+    loginBtn.addEventListener('click', () => {
+        // SÉCURITÉ : On définit la persistance sur SESSION (fermeture onglet = logout)
+        auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+            .then(() => {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.setCustomParameters({ prompt: 'select_account' });
+                return auth.signInWithPopup(provider);
+            })
+            .catch((error) => {
+                loginError.style.display = 'block';
+                loginError.innerText = "Erreur : " + error.message;
+            });
+    });
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             console.log("Utilisateur Google détecté :", user.email);
@@ -5087,7 +5114,23 @@ Content-Type: text/html; charset=utf-8
                 const userDoc = await db.collection('users').doc(user.email).get();
 
                 if (userDoc.exists) {
+                    
                     console.log("✅ Accès autorisé.");
+                    
+                    // === AUDIT : LOG DE CONNEXION ===
+                    db.collection('connection_logs').add({
+                        user: user.email,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(), // Heure serveur (fiable)
+                        date_readable: new Date().toLocaleString('fr-FR'), // Heure lisible
+                        userAgent: navigator.userAgent // Info navigateur/OS
+                    }).then(() => {
+                        console.log("📝 Connexion journalisée.");
+                    }).catch(err => {
+                        console.error("Erreur lors du log de connexion :", err);
+                    });
+                    // ================================
+    
+                    resetInactivityTimer(); // Démarrage sécurité inactivité
 
                     // --- GESTION PROFIL & LOGOUT (AJOUTE PAR SCRIPT) ---
                     const userSection = document.getElementById('user-profile-section');
